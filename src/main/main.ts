@@ -99,6 +99,12 @@ db.serialize(() => {
     .run()
     .finalize();
 
+  db.prepare(
+    fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString()
+  )
+    .run()
+    .finalize();
+
   db.all('SELECT * FROM settings', [], (err, rows) => {
     if (err) {
       console.error(err.message);
@@ -126,7 +132,12 @@ const createWindow = async () => {
     width: 1600,
     height: 900,
     icon: getAssetPath('icon.png'),
+    // autoHideMenuBar: !isDevelopment,
+    // frame: isDevelopment,
+    autoHideMenuBar: true,
+    frame: false,
     webPreferences: {
+      contextIsolation: true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -150,11 +161,6 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  mainWindow.on('minimize', (event: Event) => {
-    event.preventDefault();
-    mainWindow?.hide();
-  });
-
   app.on('before-quit', () => {
     isQuiting = true;
   });
@@ -167,10 +173,10 @@ const createWindow = async () => {
     }
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  // const menuBuilder = new MenuBuilder(mainWindow);
+  // menuBuilder.buildMenu();
 
-  const ipcBuilder = new IpcBuilder(db);
+  const ipcBuilder = new IpcBuilder(app, mainWindow, db);
   ipcBuilder.buildIpc();
 
   // Open urls in the user's browser
@@ -246,6 +252,9 @@ if (!gotTheLock) {
 function StartTasks(mainWindow: BrowserWindow) {
   console.log('Starting tasks');
   GetInstances(mainWindow, db);
+
+  console.log(app.getVersion());
+
   cron.schedule('*/15 * * * *', () => {
     GetInstances(mainWindow, db);
   });

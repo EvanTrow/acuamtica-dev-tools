@@ -8,6 +8,11 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
 
 import App from './App';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -30,6 +35,18 @@ export default function Theme() {
       createTheme({
         palette: {
           mode: prefersDarkMode ? 'dark' : 'light',
+          primary: {
+            light: '#80e27e',
+            main: '#4caf50',
+            dark: '#087f23',
+            contrastText: '#fff',
+          },
+          secondary: {
+            light: '#ff7961',
+            main: '#f44336',
+            dark: '#ba000d',
+            contrastText: '#000',
+          },
         },
       }),
     [prefersDarkMode]
@@ -41,10 +58,8 @@ export default function Theme() {
     severity: 'info',
   });
 
-  window.electron.ipcRenderer.on('alert', (arg) => {
-    // eslint-disable-next-line no-console
+  window.electronAPI.events.on('alert', (arg) => {
     console.log(arg);
-
     setSnackbar(arg as SnackbarAlert);
   });
 
@@ -67,6 +82,7 @@ export default function Theme() {
     <Router>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

@@ -5,10 +5,23 @@ const sql = require('mssql');
 const convert = require('xml-js');
 const xmlOptions = { compact: true, spaces: 4 };
 
-const { ipcMain } = require('electron');
+const { GetSettings, SendToast } = require('../helpers');
 
 export default async function GetInstances(mainWindow, database) {
   try {
+    var settings = await GetSettings(database, mainWindow).catch((err) => {
+      console.log('settings err:' + err);
+      SendToast(
+        mainWindow,
+        'Error querying Acuamtica instances (setttings) > ' + err,
+        'error'
+      );
+    });
+    if (!settings) {
+      return;
+    }
+    console.log('settings:' + settings);
+
     console.log('Getting Acumatica Instance Data');
     var sitesData = await loadXml(
       'C:\\Windows\\System32\\inetsrv\\config\\applicationHost.config'
@@ -23,7 +36,7 @@ export default async function GetInstances(mainWindow, database) {
       var db = null;
       if (
         site.virtualDirectory._attributes.physicalPath.startsWith(
-          'D:\\AcuInstances'
+          settings.instanceLocation
         )
       ) {
         var acuConfig = await loadXml(
@@ -77,11 +90,12 @@ export default async function GetInstances(mainWindow, database) {
     console.log('Complete.');
   } catch (error) {
     console.log(error);
-    mainWindow.webContents.send('alert', {
-      open: true,
-      text: 'Error querying  Acuamtica instances! > ' + error.message,
-      severity: 'error',
-    });
+
+    SendToast(
+      mainWindow,
+      'Error querying Acuamtica instances! > ' + error.message,
+      'error'
+    );
   }
 }
 

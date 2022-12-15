@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { styled } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
@@ -13,12 +13,21 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
+
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './Components/listItems';
+import CloseIcon from '@mui/icons-material/Close';
+import MaximizeIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import MinimizeIcon from '@mui/icons-material/HorizontalRule';
+
+import {
+  MainListItems,
+  SecondaryListItems,
+  getTitle,
+} from './Components/listItems';
 
 import Instances from './Pages/Instances';
+import Settings from './Pages/Settings';
+import Builds from './Pages/Builds';
 
 function Copyright(props: any) {
   return (
@@ -92,89 +101,102 @@ export default function App() {
     setOpen(!open);
   };
 
+  const location = useLocation();
+
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="absolute" open={open}>
-        <Toolbar
-          sx={{
-            pr: '24px', // keep right padding when drawer closed
-          }}
-        >
+    <>
+      <AppBar
+        className="electionTitlebar"
+        position="static"
+        color="primary"
+        enableColorOnDark
+        style={{ height: 32 }}
+      >
+        <Toolbar style={{ paddingLeft: 0, paddingRight: 0, minHeight: 32 }}>
           <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer}
+            className="electionNoDrag"
+            size="large"
             sx={{
-              marginRight: '36px',
-              ...(open && { display: 'none' }),
+              borderRadius: 0,
+              height: 32,
+              width: 32,
             }}
+            onClick={toggleDrawer}
           >
             <MenuIcon />
           </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            sx={{ flexGrow: 1 }}
-          >
-            Dashboard
+          <Typography variant="subtitle1" component="div" sx={{ flexGrow: 1 }}>
+            Acumatica Dev Tools
           </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
+          <IconButton
+            className="electionNoDrag"
+            size="large"
+            sx={{
+              borderRadius: 0,
+              height: 32,
+              width: 32,
+            }}
+            onClick={() => window.electronAPI.windowEvents('minimize')}
+          >
+            <MinimizeIcon />
+          </IconButton>
+          <IconButton
+            className="electionNoDrag"
+            size="large"
+            sx={{
+              borderRadius: 0,
+              height: 32,
+              width: 32,
+            }}
+            onClick={() => window.electronAPI.windowEvents('maximize')}
+          >
+            <MaximizeIcon />
+          </IconButton>
+          <IconButton
+            className="electionNoDrag"
+            size="large"
+            sx={{
+              borderRadius: 0,
+              height: 32,
+              width: 32,
+            }}
+            onClick={() => window.electronAPI.windowEvents('close')}
+          >
+            <CloseIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
-        <Toolbar
+      <Box sx={{ display: 'flex' }}>
+        <Drawer variant="permanent" open={open}>
+          <List component="nav">
+            <MainListItems />
+            <Divider sx={{ my: 1 }} />
+            <SecondaryListItems />
+          </List>
+        </Drawer>
+        <Box
+          component="main"
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            px: [1],
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? theme.palette.grey[100]
+                : theme.palette.grey[900],
+            flexGrow: 1,
+            height: 'calc(100vh - 32px)',
+            overflow: 'auto',
           }}
         >
-          <IconButton onClick={toggleDrawer}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </Toolbar>
-        <Divider />
-        <List component="nav">
-          {mainListItems}
-          <Divider sx={{ my: 1 }} />
-          {secondaryListItems}
-        </List>
-      </Drawer>
-      <Box
-        component="main"
-        sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'light'
-              ? theme.palette.grey[100]
-              : theme.palette.grey[900],
-          flexGrow: 1,
-          height: '100vh',
-          overflow: 'auto',
-        }}
-      >
-        <Toolbar />
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Routes>
+              <Route path="/" element={<Instances key={0} />} />
+              <Route path="/settings" element={<Settings key={0} />} />
+              <Route path="/builds" element={<Builds key={0} />} />
+            </Routes>
 
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Routes>
-            <Route path="/" element={<Instances key={0} />} />
-          </Routes>
-
-          <Copyright sx={{ pt: 4 }} />
-        </Container>
+            <Copyright sx={{ pt: 4 }} />
+          </Container>
+        </Box>
       </Box>
-    </Box>
-    // <Router>
-    //   <Routes>
-    //     <Route path="/" element={<Hello />} />
-    //   </Routes>
-    // </Router>
+    </>
   );
 }

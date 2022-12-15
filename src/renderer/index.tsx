@@ -1,28 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { createRoot } from 'react-dom/client';
 
-import Theme from './Theme';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+import Theme from './Theme';
+import { SettingsRow } from './types';
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(
-  <React.StrictMode>
-    <Theme key={0} />
-  </React.StrictMode>
-);
 
-export type SettingsRow = {
-  hostname: string;
-  instanceLocation: string;
-  buildLocation: string;
-  extractMsi: boolean;
-  lessmsiPath: string;
-};
+window.electronAPI
+  .getSettings()
+  .then((settings: SettingsRow) => {
+    window.appSettings = settings;
 
-// calling IPC exposed from preload script
-window.electron.ipcRenderer.sendMessage('getSettings', ['getSettings']);
-window.electron.ipcRenderer.on('setSettings', (arg) => {
-  // eslint-disable-next-line no-console
-  window.appSettings = arg as SettingsRow;
-});
+    console.log(settings);
+
+    root.render(
+      <React.StrictMode>
+        <Theme key={0} />
+      </React.StrictMode>
+    );
+  })
+  .catch((err) => {
+    root.render(
+      <React.StrictMode>
+        <Theme key={0} />
+        <Snackbar open={true} autoHideDuration={6000}>
+          <Alert severity="error" sx={{ width: '100%' }}>
+            Error getting settings: {String(err)}
+          </Alert>
+        </Snackbar>
+      </React.StrictMode>
+    );
+  });
