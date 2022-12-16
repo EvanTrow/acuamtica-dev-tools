@@ -198,7 +198,8 @@
   },
   "build": {
     "productName": "Acumatica Dev Tools",
-    "appId": "tech.trowbridge.acumatica",
+    "artifactName": "Acumatica.Dev.Tools",
+    "appId": "tech.trowbridge.acumatica-dev-tools",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [

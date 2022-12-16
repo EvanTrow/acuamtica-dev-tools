@@ -1,8 +1,13 @@
-<div align="center">
+# Acumatica Dev Tools
+
+![Screenshot 1](./.erb\img\screenshot01.png 'Screenshot 1')
+
+# Latest Release
 
 [![Github Tag][github-tag-image]][github-tag-url]
 
-</div>
+<br/>
+<br/>
 
 ## Install
 
@@ -36,5 +41,5 @@ npm run package
 
 MIT © [EvanTrow](https://github.com/EvanTrow)
 
-[github-tag-image]: https://img.shields.io/github/tag/EvanTrow/acuamtica-dev-tools.svg?label=version
+[github-tag-image]: https://img.shields.io/github/tag/EvanTrow/acuamtica-dev-tools.svg?label=Download&style=for-the-badge
 [github-tag-url]: https://github.com/EvanTrow/acuamtica-dev-tools/releases/latest
