@@ -1,6 +1,6 @@
 # Acumatica Dev Tools
 
-![Screenshot 1](./.erb\img\screenshot01.png 'Screenshot 1')
+![Screenshot 1](./.erb/img/screenshot01.png 'Screenshot 1')
 
 # Latest Release
 
