@@ -56,9 +56,9 @@ if (process.env.NODE_ENV === 'production') {
 const isDevelopment =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDevelopment) {
-  require('electron-debug')();
-}
+// if (isDevelopment) {
+require('electron-debug')();
+// }
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -81,10 +81,13 @@ const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
-// Connect to db
-const db = new sqlite.Database('./db.sqlite3', (err) => {
-  if (err) console.error('Database opening error: ', err);
-});
+let userDataPath = app.getPath('userData');
+const db = new sqlite.Database(
+  isDevelopment ? './db.sqlite3' : userDataPath + '/db.sqlite3',
+  (err) => {
+    if (err) console.error('Database opening error: ', err);
+  }
+);
 
 db.serialize(() => {
   db.prepare(
@@ -252,8 +255,6 @@ if (!gotTheLock) {
 function StartTasks(mainWindow: BrowserWindow) {
   console.log('Starting tasks');
   GetInstances(mainWindow, db);
-
-  console.log(app.getVersion());
 
   cron.schedule('*/15 * * * *', () => {
     GetInstances(mainWindow, db);

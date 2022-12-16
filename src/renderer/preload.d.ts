@@ -21,11 +21,15 @@ import { InstanceRow, SettingsRow } from './types';
 
 export interface IElectronAPI {
   windowEvents: (action: string) => void;
+  getAppVersion: () => Promise<string>;
 
   getSettings: () => Promise<SettingsRow>;
   checkPath: (filePath: string) => Promise<boolean>;
   execSQL: (query: string) => void;
+
+  reloadInstances: () => Promise<boolean>;
   getInstances: () => Promise<InstanceRow[]>;
+
   getBuilds: () => Promise<string[]>;
 
   events: {

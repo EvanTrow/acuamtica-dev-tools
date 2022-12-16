@@ -1,25 +1,15 @@
 import * as React from 'react';
 import { MemoryRouter as Router } from 'react-router-dom';
+import { VariantType, useSnackbar } from 'notistack';
+
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
+import { AlertColor } from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 import App from './App';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import MenuIcon from '@mui/icons-material/Menu';
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
 
 export type SnackbarAlert = {
   open: boolean;
@@ -52,52 +42,35 @@ export default function Theme() {
     [prefersDarkMode]
   );
 
-  const [snackbar, setSnackbar] = React.useState<SnackbarAlert>({
-    open: false,
-    text: '',
-    severity: 'info',
-  });
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   window.electronAPI.events.on('alert', (arg) => {
-    console.log(arg);
-    setSnackbar(arg as SnackbarAlert);
-  });
+    // console.log(arg);
+    // setSnackbar(arg as SnackbarAlert);
+    let alert: SnackbarAlert = arg as SnackbarAlert;
+    let variant: VariantType = alert.severity;
 
-  const handleClose = (
-    event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setSnackbar({
-      open: false,
-      text: '',
-      severity: snackbar.severity,
+    enqueueSnackbar(alert.text, {
+      variant,
+      preventDuplicate: true,
+      action: (key) => (
+        <>
+          <IconButton
+            aria-label="close"
+            size="small"
+            onClick={() => closeSnackbar(key)}
+          >
+            <CloseIcon />
+          </IconButton>
+        </>
+      ),
     });
-  };
+  });
 
   return (
     <Router>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={handleClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert
-            onClose={handleClose}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
-            {snackbar.text}
-          </Alert>
-        </Snackbar>
-
         <App key={0} />
       </ThemeProvider>
     </Router>

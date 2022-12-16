@@ -23,10 +23,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   windowEvents: (action: string) => ipcRenderer.invoke('windowEvents', action),
+  getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
 
   getSettings: () => ipcRenderer.invoke('getSettings'),
   checkPath: (filePath: string) => ipcRenderer.invoke('checkPath', filePath),
   execSQL: (query: string) => ipcRenderer.send('execSQL', query),
+
+  reloadInstances: () => ipcRenderer.invoke('reloadInstances'),
   getInstances: () => ipcRenderer.invoke('getInstances'),
+
   getBuilds: () => ipcRenderer.invoke('getBuilds'),
 });

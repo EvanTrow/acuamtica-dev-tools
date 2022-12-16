@@ -20,7 +20,6 @@ export default async function GetInstances(mainWindow, database) {
     if (!settings) {
       return;
     }
-    console.log('settings:' + settings);
 
     console.log('Getting Acumatica Instance Data');
     var sitesData = await loadXml(
@@ -34,10 +33,11 @@ export default async function GetInstances(mainWindow, database) {
     await asyncForEach(sitesData, async (site, i) => {
       var acumaticaVersion = 'N/A';
       var db = null;
+
       if (
-        site.virtualDirectory._attributes.physicalPath.startsWith(
-          settings.instanceLocation
-        )
+        site.virtualDirectory._attributes.physicalPath
+          ?.toLocaleLowerCase()
+          .startsWith(settings.instanceLocation?.toLocaleLowerCase())
       ) {
         var acuConfig = await loadXml(
           `${site.virtualDirectory._attributes.physicalPath}Web.config`
@@ -78,10 +78,24 @@ export default async function GetInstances(mainWindow, database) {
     });
 
     sites.forEach((site) => {
+      console.log('Updating instance:', site.name);
+
+      if (typeof site.database?.name == 'undefined') {
+        SendToast(
+          mainWindow,
+          'Unable to query database for ' + site.name,
+          'warning'
+        );
+      }
+
       database
         .prepare(
           `INSERT OR REPLACE INTO instances (name, path, installPath, version, dbName, dbSize, dbLogSize, dbTotalSize) 
-	  VALUES ("${site.name}", "${site.path}", "${site.installPath}", "${site.version}", "${site.database.name}", "${site.database.db}", "${site.database.log}", "${site.database.total}");`
+	  VALUES ("${site.name}", "${site.path}", "${site.installPath}", "${
+            site.version
+          }", "${site.database?.name || ''}", "${site.database?.db || 0}", "${
+            site.database?.log || 0
+          }", "${site.database?.total || 0}");`
         )
         .run()
         .finalize();

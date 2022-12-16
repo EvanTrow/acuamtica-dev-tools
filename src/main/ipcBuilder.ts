@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import fs from 'fs';
 import sqlite from 'sqlite3';
+import GetInstances from './actions/getInstances';
 
 import { SendToast } from './helpers';
 
@@ -38,6 +39,12 @@ export default class IpcBuilder {
           break;
       }
       return;
+    });
+
+    ipcMain.handle('getAppVersion', async (event) => {
+      return new Promise((resolve, reject) => {
+        resolve(this.app.getVersion());
+      });
     });
 
     ipcMain.handle('getSettings', async (event) => {
@@ -95,6 +102,13 @@ export default class IpcBuilder {
           'error'
         );
       }
+    });
+
+    ipcMain.handle('reloadInstances', async (event) => {
+      return new Promise(async (resolve, reject) => {
+        await GetInstances(this.mainWindow, this.db);
+        resolve(true);
+      });
     });
 
     ipcMain.handle('getInstances', async (event) => {

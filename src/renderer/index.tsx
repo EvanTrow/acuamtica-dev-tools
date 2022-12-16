@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { SnackbarProvider } from 'notistack';
 
 import Theme from './Theme';
 import { SettingsRow } from './types';
@@ -27,14 +28,18 @@ window.electronAPI
 
     root.render(
       <React.StrictMode>
-        <Theme key={0} />
+        <SnackbarProvider maxSnack={3}>
+          <Theme key={0} />
+        </SnackbarProvider>
       </React.StrictMode>
     );
   })
   .catch((err) => {
     root.render(
       <React.StrictMode>
-        <Theme key={0} />
+        <SnackbarProvider maxSnack={3}>
+          <Theme key={0} />
+        </SnackbarProvider>
         <Snackbar open={true} autoHideDuration={6000}>
           <Alert severity="error" sx={{ width: '100%' }}>
             Error getting settings: {String(err)}

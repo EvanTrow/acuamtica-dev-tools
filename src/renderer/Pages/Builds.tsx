@@ -19,9 +19,11 @@ export default function Instances() {
   const [rows, setRows] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    window.electronAPI.getBuilds().then((builds) => {
-      setRows(builds);
-    });
+    if (BuildsSettingsComplete()) {
+      window.electronAPI.getBuilds().then((builds) => {
+        setRows(builds);
+      });
+    }
   }, []);
 
   return (
