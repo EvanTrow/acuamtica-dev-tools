@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from 'electron';
 import fs from 'fs';
 import sqlite from 'better-sqlite3';
 import child, { ExecFileException } from 'child_process';
+
 import GetInstances from './actions/getInstances';
 
 import { SendToast } from './helpers';
@@ -63,6 +64,10 @@ export default class IpcBuilder {
 					resolve(true);
 				}
 			});
+		});
+
+		ipcMain.handle('sendToast', async (event, text, severity) => {
+			SendToast(this.mainWindow, text, severity);
 		});
 
 		ipcMain.handle('openDirectory', async (event, path) => {
@@ -141,6 +146,18 @@ export default class IpcBuilder {
 				} catch (e) {
 					console.log(e);
 					SendToast(this.mainWindow, 'IPC Error! sql > ' + (e as Error).message, 'error');
+				}
+			});
+		});
+
+		ipcMain.handle('getAvailableBuilds', async (event) => {
+			return new Promise(async (resolve, reject) => {
+				try {
+					const builds = this.db.prepare('SELECT * FROM availableBuilds').all();
+					resolve(builds);
+				} catch (e) {
+					SendToast(this.mainWindow, 'IPC Error! getAvailableBuilds > ' + (e as Error).message, 'error');
+					reject((e as Error).message.toString());
 				}
 			});
 		});

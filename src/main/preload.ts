@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	},
 
 	windowEvents: (action: string) => ipcRenderer.invoke('windowEvents', action),
+	sendToast: (text: string, severity: string) => ipcRenderer.invoke('sendToast', text, severity),
 	getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
 	launchApp: (path: string) => ipcRenderer.invoke('launchApp', path),
 	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
@@ -31,4 +32,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	getInstances: () => ipcRenderer.invoke('getInstances'),
 
 	getBuilds: () => ipcRenderer.invoke('getBuilds'),
+	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),
 });

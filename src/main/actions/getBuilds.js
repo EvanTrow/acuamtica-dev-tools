@@ -4,9 +4,6 @@ const naturalSort = require('javascript-natural-sort');
 
 const { SendToast } = require('../helpers');
 
-var builds = [];
-var versions = [];
-
 var xmlOptions = { compact: true, spaces: 4 };
 
 export default function GetBuilds(mainWindow, database) {
@@ -14,6 +11,8 @@ export default function GetBuilds(mainWindow, database) {
 }
 
 async function start(mainWindow, database) {
+	var builds = [];
+	var versions = [];
 	try {
 		console.log('Getting Acumatica Builds Data');
 
@@ -66,6 +65,7 @@ async function start(mainWindow, database) {
 				SendToast(mainWindow, 'Error getting Acumatica Builds > ' + err.message, 'error');
 			});
 
+		database.prepare('delete from availableBuilds').run();
 		const insert = database.prepare(`INSERT OR REPLACE INTO availableBuilds (build, version, path) 
 		VALUES (@build, @version, @path)`);
 		const insertMany = database.transaction((builds) => {

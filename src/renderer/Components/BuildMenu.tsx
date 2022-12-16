@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { BuildMenuProp } from 'renderer/types';
 import path from 'path-browserify';
 
 import Button from '@mui/material/Button';
@@ -15,7 +14,13 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
 import { blue } from '@mui/material/colors';
 
-export default function BuildMenu(props: BuildMenuProp) {
+export type BuildMenuProps = {
+	button: BuildMenuButton;
+	build: string;
+};
+export type BuildMenuButton = 'icon' | 'button';
+
+export default function BuildMenu(props: BuildMenuProps) {
 	const [buildExists, setBuildExists] = React.useState(props.button != 'button');
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

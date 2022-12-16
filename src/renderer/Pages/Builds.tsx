@@ -18,6 +18,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Divider from '@mui/material/Divider';
 import BuildMenu from 'renderer/Components/BuildMenu';
+import BuildSearchDialog from 'renderer/Components/BuildSearchDialog';
 
 export default function Instances() {
 	const [filter, setFilter] = React.useState('');
@@ -27,6 +28,8 @@ export default function Instances() {
 	const [loadingConfig, setLoadingConfig] = React.useState('');
 
 	const [builds, setBuilds] = React.useState<string[]>([]);
+
+	const [dialogOpen, setDialogOpen] = React.useState(false);
 
 	React.useEffect(() => {
 		if (BuildsSettingsComplete()) {
@@ -79,9 +82,12 @@ export default function Instances() {
 							</Box>
 						</Grid>
 					</Grid>
-					<Fab color='primary' aria-label='download' sx={{ position: 'absolute', bottom: 16, right: 16 }}>
+
+					<Fab color='primary' aria-label='download' sx={{ position: 'absolute', bottom: 16, right: 16 }} onClick={() => setDialogOpen(true)}>
 						<DownloadIcon />
 					</Fab>
+
+					<BuildSearchDialog enabled={BuildsSettingsComplete()} open={dialogOpen} setOpen={(open) => setDialogOpen(open)} />
 				</>
 			) : (
 				<BuildsSettingsAlert />

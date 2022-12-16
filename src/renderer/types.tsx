@@ -17,8 +17,8 @@ export type InstanceRow = {
 	dbTotalSize: number;
 };
 
-export type BuildMenuProp = {
-	button: BuildMenuButton;
+export type BuildsRow = {
 	build: string;
+	version: string;
+	path: string;
 };
-export type BuildMenuButton = 'icon' | 'button';
