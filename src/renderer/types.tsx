@@ -16,3 +16,9 @@ export type InstanceRow = {
 	dbLogSize: number;
 	dbTotalSize: number;
 };
+
+export type BuildMenuProp = {
+	button: BuildMenuButton;
+	build: string;
+};
+export type BuildMenuButton = 'icon' | 'button';

@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS settings (
     instanceLocation TEXT, 
     buildLocation TEXT, 
     extractMsi BIT DEFAULT 0 NOT NULL, 
-    lessmsiPath TEXT
+    lessmsiPath TEXT, 
+    windowWidth BIT DEFAULT 1600 NOT NULL, 
+    windowheight BIT DEFAULT 900 NOT NULL
 );

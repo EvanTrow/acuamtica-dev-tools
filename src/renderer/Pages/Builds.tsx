@@ -1,24 +1,37 @@
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Tooltip from '@mui/material/Tooltip';
-import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
+
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import IconButton from '@mui/material/IconButton';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+
+import SearchIcon from '@mui/icons-material/Search';
+import DownloadIcon from '@mui/icons-material/Download';
+
 import { BuildsSettingsAlert, BuildsSettingsComplete } from '../Components/Alerts';
-import { InstanceRow } from 'renderer/types';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Fab from '@mui/material/Fab';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import Divider from '@mui/material/Divider';
+import BuildMenu from 'renderer/Components/BuildMenu';
 
 export default function Instances() {
-	const [rows, setRows] = React.useState<string[]>([]);
+	const [filter, setFilter] = React.useState('');
+
+	const [loadingDirectory, setLoadingDirectory] = React.useState('');
+	const [loadingReport, setLoadingReport] = React.useState('');
+	const [loadingConfig, setLoadingConfig] = React.useState('');
+
+	const [builds, setBuilds] = React.useState<string[]>([]);
 
 	React.useEffect(() => {
 		if (BuildsSettingsComplete()) {
 			window.electronAPI.getBuilds().then((builds) => {
-				setRows(builds);
+				setBuilds(builds.reverse());
 			});
 		}
 	}, []);
@@ -26,29 +39,50 @@ export default function Instances() {
 	return (
 		<>
 			{BuildsSettingsComplete() ? (
-				<TableContainer component={Paper}>
-					<Table aria-label='simple table'>
-						<TableHead>
-							<TableRow>
-								<TableCell>Version</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{rows.map((row) => (
-								<TableRow key={row} hover>
-									<TableCell>{row}</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-					{rows.length == 0 ? (
-						<Box sx={{ width: '100%' }}>
-							<LinearProgress />
-						</Box>
-					) : (
-						<></>
-					)}
-				</TableContainer>
+				<>
+					<Grid container spacing={2} minHeight={160}>
+						<Grid item xs={12} display='flex' justifyContent='center' alignItems='center'>
+							<TextField
+								size='small'
+								label='Filter'
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position='start'>
+											<SearchIcon />
+										</InputAdornment>
+									),
+								}}
+								variant='outlined'
+								sx={{ width: 350 }}
+								value={filter}
+								onChange={(e) => setFilter(e.target.value)}
+							/>
+						</Grid>
+						<Grid item xs={12} display='flex' justifyContent='center' alignItems='center'>
+							<Box sx={{ width: '100%', maxWidth: 360 }}>
+								<Card>
+									<List>
+										{builds
+											.filter((build) => build.includes(filter))
+											.map((build, i) => (
+												<React.Fragment key={build}>
+													<ListItem secondaryAction={<BuildMenu build={build} button='icon' />} disablePadding>
+														<ListItemButton>
+															<ListItemText primary={build} />
+														</ListItemButton>
+													</ListItem>
+													{i + 1 == builds.filter((build) => build.includes(filter)).length ? '' : <Divider />}
+												</React.Fragment>
+											))}
+									</List>
+								</Card>
+							</Box>
+						</Grid>
+					</Grid>
+					<Fab color='primary' aria-label='download' sx={{ position: 'absolute', bottom: 16, right: 16 }}>
+						<DownloadIcon />
+					</Fab>
+				</>
 			) : (
 				<BuildsSettingsAlert />
 			)}

@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "@types/mssql": "^8.1.1",
-    "sqlite3": "^5.1.4"
+    "better-sqlite3": "^8.0.1"
   }
 }

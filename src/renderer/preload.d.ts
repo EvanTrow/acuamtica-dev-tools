@@ -3,6 +3,8 @@ import { InstanceRow, SettingsRow } from './types';
 export interface IElectronAPI {
 	windowEvents: (action: string) => void;
 	getAppVersion: () => Promise<string>;
+	launchApp: (path: string) => Promise<boolean>;
+	openDirectory: (path: string) => Promise<boolean>;
 
 	getSettings: () => Promise<SettingsRow>;
 	checkPath: (filePath: string) => Promise<boolean>;

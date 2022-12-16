@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -13,6 +14,8 @@ import { InstanceSettingsAlert, InstanceSettingsComplete } from '../Components/A
 import { InstanceRow } from 'renderer/types';
 import Button from '@mui/material/Button';
 import SyncIcon from '@mui/icons-material/Sync';
+import { DynamicSort } from 'renderer/helpers';
+import BuildMenu from 'renderer/Components/BuildMenu';
 
 export default function Instances() {
 	const [rows, setRows] = React.useState<InstanceRow[]>([]);
@@ -22,7 +25,7 @@ export default function Instances() {
 		if (InstanceSettingsComplete()) {
 			window.electronAPI.getInstances().then((instances) => {
 				setLoading(false);
-				setRows(instances);
+				setRows(instances.sort(DynamicSort('name')));
 			});
 		}
 	}, []);
@@ -45,11 +48,14 @@ export default function Instances() {
 								{rows.map((row) => (
 									<TableRow key={row.name} hover>
 										<TableCell component='th' scope='row'>
-											<a href={'http://' + window.appSettings?.hostname + row.path} target='_blank'>
+											<Link href={'http://' + window.appSettings?.hostname + row.path} target='_blank'>
 												{row.name}
-											</a>
+											</Link>
 										</TableCell>
-										<TableCell>{row.version}</TableCell>
+										<TableCell sx={{ paddingTop: 0.5, paddingBottom: 0.5 }}>
+											{/* {row.version} */}
+											<BuildMenu build={row.version} button='button' />
+										</TableCell>
 										<TableCell>{row.installPath}</TableCell>
 										<TableCell>
 											<Tooltip

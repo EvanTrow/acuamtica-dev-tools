@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { MemoryRouter as Router } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import { VariantType, useSnackbar } from 'notistack';
 
 import useMediaQuery from '@mui/material/useMediaQuery';

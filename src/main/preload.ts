@@ -1,8 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-// contextBridge.exposeInMainWorld('electron', {
-// });
-
 contextBridge.exposeInMainWorld('electronAPI', {
 	events: {
 		sendMessage(channel: string, args: unknown[]) {
@@ -23,6 +20,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 	windowEvents: (action: string) => ipcRenderer.invoke('windowEvents', action),
 	getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
+	launchApp: (path: string) => ipcRenderer.invoke('launchApp', path),
+	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
 
 	getSettings: () => ipcRenderer.invoke('getSettings'),
 	checkPath: (filePath: string) => ipcRenderer.invoke('checkPath', filePath),

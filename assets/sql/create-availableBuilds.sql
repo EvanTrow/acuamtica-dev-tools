@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS availableBuilds (
-    version TEXT NOT NULL PRIMARY KEY,
-    build TEXT NOT NULL, 
+    build TEXT NOT NULL PRIMARY KEY,
+    version TEXT NOT NULL, 
     path TEXT NOT NULL
 );

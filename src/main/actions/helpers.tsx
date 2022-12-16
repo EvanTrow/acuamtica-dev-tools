@@ -1,21 +1,20 @@
 import { BrowserWindow } from 'electron';
-import sqlite from 'sqlite3';
+import sqlite from 'better-sqlite3';
 
 import { AlertColor } from '@mui/material/Alert';
 
 export function GetSettings(db: sqlite.Database, mainWindow: BrowserWindow) {
 	return new Promise((resolve, reject) => {
-		db.all('SELECT * FROM settings', [], (err, rows) => {
-			if (err) {
-				reject(err.message.toString());
-			} else {
-				var settings = rows[0];
-				resolve({
-					...settings,
-					extractMsi: settings.extractMsi == 1 ? true : false,
-				});
-			}
-		});
+		try {
+			const settings = db.prepare('SELECT * FROM settings').get();
+			resolve({
+				...settings,
+				extractMsi: settings.extractMsi == 1 ? true : false,
+			});
+		} catch (e) {
+			SendToast(mainWindow, 'Unable to get settings > ' + (e as Error).message, 'error');
+			reject((e as Error).message.toString());
+		}
 	});
 }
 
@@ -25,4 +24,29 @@ export function SendToast(mainWindow: BrowserWindow, message: string, severity: 
 		text: message,
 		severity: severity,
 	});
+}
+
+export async function OpenExplorer(path: string) {
+	const { spawn } = require('child_process');
+	const child = spawn('explorer', [path]);
+
+	let data = '';
+	for await (const chunk of child.stdout) {
+		//console.log('stdout chunk: '+chunk);
+		data += chunk;
+	}
+	let error = '';
+	for await (const chunk of child.stderr) {
+		console.error('stderr chunk: ' + chunk);
+		error += chunk;
+	}
+	await new Promise((resolve, reject) => {
+		child.on('close', resolve);
+	});
+
+	return data;
+}
+
+export function WindowsPath(path: string): string {
+	return path.replaceAll('/', '\\');
 }

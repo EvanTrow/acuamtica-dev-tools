@@ -29,7 +29,7 @@ function Copyright(props: any) {
 	return (
 		<Typography variant='body2' color='text.secondary' align='center' {...props}>
 			{'Check out my Github: '}
-			<Link color='inherit' href='https://github.com/EvanTrow' target='_blank'>
+			<Link href='https://github.com/EvanTrow' target='_blank'>
 				EvanTrow
 			</Link>
 		</Typography>

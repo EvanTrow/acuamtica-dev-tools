@@ -9,10 +9,7 @@ const { GetSettings, SendToast } = require('../helpers');
 
 export default async function GetInstances(mainWindow, database) {
 	try {
-		var settings = await GetSettings(database, mainWindow).catch((err) => {
-			console.log('settings err:' + err);
-			SendToast(mainWindow, 'Error querying Acuamtica instances (setttings) > ' + err, 'error');
-		});
+		const settings = database.prepare('SELECT * FROM settings').get();
 		if (!settings) {
 			return;
 		}
@@ -36,13 +33,13 @@ export default async function GetInstances(mainWindow, database) {
 
 					await sql.connect(`${connectionString};Encrypt=true;trustServerCertificate=true`);
 					const result = await sql.query(`SELECT 
-									name = DB_NAME(),
-									log = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 / 1024 AS DECIMAL(12,4)),
-									db = CAST(SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024 / 1024 AS DECIMAL(12,4)),
-									total = CAST(SUM(size) * 8. / 1024 / 1024 AS DECIMAL(12,4))
-								FROM sys.master_files WITH(NOWAIT)
-								WHERE database_id = DB_ID()
-								GROUP BY database_id`);
+						dbName = DB_NAME(),
+						dbSize = CAST(SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024 / 1024 AS DECIMAL(12,4)),
+						dbLogSize = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 / 1024 AS DECIMAL(12,4)),
+						dbTotalSize = CAST(SUM(size) * 8. / 1024 / 1024 AS DECIMAL(12,4))
+						FROM sys.master_files WITH(NOWAIT)
+						WHERE database_id = DB_ID()
+						GROUP BY database_id`);
 					await sql.close();
 					db = result?.recordset?.[0];
 				} catch (error) {}
@@ -52,7 +49,7 @@ export default async function GetInstances(mainWindow, database) {
 					path: site._attributes.path,
 					version: acumaticaVersion,
 					installPath: site.virtualDirectory._attributes.physicalPath,
-					database: db,
+					...db,
 				});
 			}
 		});
@@ -60,20 +57,17 @@ export default async function GetInstances(mainWindow, database) {
 		sites.forEach((site) => {
 			console.log('Updating instance:', site.name);
 
-			if (typeof site.database?.name == 'undefined') {
+			if (typeof site.dbName == 'undefined') {
 				SendToast(mainWindow, 'Unable to query database for ' + site.name, 'warning');
 			}
-
-			database
-				.prepare(
-					`INSERT OR REPLACE INTO instances (name, path, installPath, version, dbName, dbSize, dbLogSize, dbTotalSize) 
-	  VALUES ("${site.name}", "${site.path}", "${site.installPath}", "${site.version}", "${site.database?.name || ''}", "${site.database?.db || 0}", "${site.database?.log || 0}", "${
-						site.database?.total || 0
-					}");`
-				)
-				.run()
-				.finalize();
 		});
+
+		const insert = database.prepare(`INSERT OR REPLACE INTO instances (name, path, version, installPath, dbName, dbSize, dbLogSize, dbTotalSize) 
+		VALUES (@name, @path, @version, @installPath, @dbName, @dbSize, @dbLogSize, @dbTotalSize)`);
+		const insertMany = database.transaction((sites) => {
+			for (const site of sites) insert.run(site);
+		});
+		insertMany(sites);
 
 		console.log('Complete.');
 	} catch (error) {

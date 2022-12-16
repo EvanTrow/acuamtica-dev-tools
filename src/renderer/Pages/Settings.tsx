@@ -27,7 +27,7 @@ export default function Instances() {
 	const updateHostname = (hostname: string) => {
 		setHostname(hostname);
 		window.appSettings.hostname = hostname;
-		window.electronAPI.execSQL(`UPDATE settings SET hostname = "${hostname}";`);
+		window.electronAPI.execSQL(`UPDATE settings SET hostname = '${hostname}';`);
 	};
 
 	const updateInstanceLocation = async (instanceLocation: string) => {
@@ -36,7 +36,7 @@ export default function Instances() {
 		setInstanceLocationValid(validPath || instanceLocation === '');
 		if (validPath || instanceLocation === '') {
 			window.appSettings.instanceLocation = instanceLocation;
-			window.electronAPI.execSQL(`UPDATE settings SET instanceLocation = "${instanceLocation}";`);
+			window.electronAPI.execSQL(`UPDATE settings SET instanceLocation = '${instanceLocation}';`);
 		}
 	};
 
@@ -46,7 +46,7 @@ export default function Instances() {
 		setBuildLocationValid(validPath || buildLocation === '');
 		if (validPath || buildLocation === '') {
 			window.appSettings.buildLocation = buildLocation;
-			window.electronAPI.execSQL(`UPDATE settings SET buildLocation = "${buildLocation}";`);
+			window.electronAPI.execSQL(`UPDATE settings SET buildLocation = '${buildLocation}';`);
 		}
 	};
 
@@ -62,7 +62,7 @@ export default function Instances() {
 		setLessmsiPathValid(validPath && lessmsiPath.endsWith('.exe'));
 		if (validPath && lessmsiPath.endsWith('.exe')) {
 			window.appSettings.lessmsiPath = lessmsiPath;
-			window.electronAPI.execSQL(`UPDATE settings SET lessmsiPath = "${lessmsiPath}";`);
+			window.electronAPI.execSQL(`UPDATE settings SET lessmsiPath = '${lessmsiPath}';`);
 		}
 	};
 

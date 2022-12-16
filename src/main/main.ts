@@ -13,13 +13,14 @@ import fs from 'fs';
 import { app, BrowserWindow, shell, ipcMain, Tray, Menu, Event } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import sqlite from 'sqlite3';
+import Database from 'better-sqlite3';
 import cron from 'node-cron';
 import MenuBuilder from './menuBuilder';
 import IpcBuilder from './ipcBuilder';
 import { resolveHtmlPath } from './util';
 
 import GetInstances from './actions/getInstances';
+import GetBuilds from './actions/getBuilds';
 
 class AppUpdater {
 	constructor() {
@@ -70,35 +71,16 @@ const getAssetPath = (...paths: string[]): string => {
 };
 
 let userDataPath = app.getPath('userData');
-const db = new sqlite.Database(isDevelopment ? './db.sqlite3' : userDataPath + '/db.sqlite3', (err) => {
-	if (err) console.error('Database opening error: ', err);
-});
+const db = new Database(isDevelopment ? './db.sqlite3' : userDataPath + '/db.sqlite3');
 
-db.serialize(() => {
-	db.prepare(fs.readFileSync(getAssetPath('sql/create-settings.sql')).toString())
-		.run()
-		.finalize();
+db.exec(fs.readFileSync(getAssetPath('sql/create-settings.sql')).toString());
+db.exec(fs.readFileSync(getAssetPath('sql/create-instances.sql')).toString());
+db.exec(fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString());
 
-	db.prepare(fs.readFileSync(getAssetPath('sql/create-instances.sql')).toString())
-		.run()
-		.finalize();
-
-	db.prepare(fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString())
-		.run()
-		.finalize();
-
-	db.all('SELECT * FROM settings', [], (err, rows) => {
-		if (err) {
-			console.error(err.message);
-		}
-
-		if (rows.length == 0) {
-			console.log('Initalizing SQLite...');
-
-			db.prepare(`INSERT INTO settings (hostname, extractMsi) VALUES ("localhost", 0);`).run().finalize();
-		}
-	});
-});
+const settings = db.prepare('SELECT * FROM settings').get();
+if (!settings) {
+	db.prepare(`INSERT INTO settings (hostname, extractMsi) VALUES (?, ?);`).run('localhost', 0);
+}
 
 const createWindow = async () => {
 	if (isDevelopment) {
@@ -107,8 +89,8 @@ const createWindow = async () => {
 
 	mainWindow = new BrowserWindow({
 		show: false,
-		width: 1600,
-		height: 900,
+		width: settings.windowWidth,
+		height: settings.windowheight,
 		icon: getAssetPath('icon.png'),
 		// autoHideMenuBar: !isDevelopment,
 		// frame: isDevelopment,
@@ -161,6 +143,16 @@ const createWindow = async () => {
 		return { action: 'deny' };
 	});
 
+	// remember window size
+	mainWindow.on('resize', function () {
+		var size = mainWindow?.getSize();
+		var width = size?.[0];
+		var height = size?.[1];
+		if (width != null && height != null) {
+			db.prepare(`UPDATE settings SET windowWidth = ${width}, windowheight = ${height};`).run();
+		}
+	});
+
 	// Remove this if your app does not use auto updates
 	// eslint-disable-next-line
 	new AppUpdater();
@@ -191,7 +183,8 @@ if (!gotTheLock) {
 		}
 	});
 
-	app.whenReady()
+	app
+		.whenReady()
 		.then(() => {
 			tray = new Tray(getAssetPath('icon.ico'));
 			const trayMenu = Menu.buildFromTemplate([
@@ -232,8 +225,13 @@ function StartTasks(mainWindow: BrowserWindow) {
 		GetInstances(mainWindow, db);
 	});
 
+	GetBuilds(mainWindow, db);
+	cron.schedule('*/6 * * * *', () => {
+		GetBuilds(mainWindow, db);
+	});
+
 	autoUpdater.checkForUpdatesAndNotify();
-	cron.schedule('0 */3 * * *', () => {
+	cron.schedule('0 */12 * * *', () => {
 		autoUpdater.checkForUpdatesAndNotify();
 	});
 }
