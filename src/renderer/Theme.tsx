@@ -12,67 +12,63 @@ import CloseIcon from '@mui/icons-material/Close';
 import App from './App';
 
 export type SnackbarAlert = {
-  open: boolean;
-  text: string;
-  severity: AlertColor;
+	open: boolean;
+	text: string;
+	severity: AlertColor;
 };
 
 export default function Theme() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+	const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
-          primary: {
-            light: '#80e27e',
-            main: '#4caf50',
-            dark: '#087f23',
-            contrastText: '#fff',
-          },
-          secondary: {
-            light: '#ff7961',
-            main: '#f44336',
-            dark: '#ba000d',
-            contrastText: '#000',
-          },
-        },
-      }),
-    [prefersDarkMode]
-  );
+	const theme = React.useMemo(
+		() =>
+			createTheme({
+				palette: {
+					mode: prefersDarkMode ? 'dark' : 'light',
+					primary: {
+						light: '#80e27e',
+						main: '#4caf50',
+						dark: '#087f23',
+						contrastText: '#fff',
+					},
+					secondary: {
+						light: '#ff7961',
+						main: '#f44336',
+						dark: '#ba000d',
+						contrastText: '#000',
+					},
+				},
+			}),
+		[prefersDarkMode]
+	);
 
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+	const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  window.electronAPI.events.on('alert', (arg) => {
-    // console.log(arg);
-    // setSnackbar(arg as SnackbarAlert);
-    let alert: SnackbarAlert = arg as SnackbarAlert;
-    let variant: VariantType = alert.severity;
+	window.electronAPI.events.on('alert', (arg) => {
+		// console.log(arg);
+		// setSnackbar(arg as SnackbarAlert);
+		let alert: SnackbarAlert = arg as SnackbarAlert;
+		let variant: VariantType = alert.severity;
 
-    enqueueSnackbar(alert.text, {
-      variant,
-      preventDuplicate: true,
-      action: (key) => (
-        <>
-          <IconButton
-            aria-label="close"
-            size="small"
-            onClick={() => closeSnackbar(key)}
-          >
-            <CloseIcon />
-          </IconButton>
-        </>
-      ),
-    });
-  });
+		enqueueSnackbar(alert.text, {
+			variant,
+			preventDuplicate: true,
+			action: (key) => (
+				<>
+					<IconButton aria-label='close' size='small' onClick={() => closeSnackbar(key)}>
+						<CloseIcon />
+					</IconButton>
+				</>
+			),
+		});
+	});
 
-  return (
-    <Router>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App key={0} />
-      </ThemeProvider>
-    </Router>
-  );
+	return (
+		<Router>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				<App key={0} />
+			</ThemeProvider>
+		</Router>
+	);
 }
