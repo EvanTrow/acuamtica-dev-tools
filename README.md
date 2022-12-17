@@ -6,9 +6,6 @@
 
 [![Github Tag][github-tag-image]][github-tag-url]
 
-<br/>
-<br/>
-
 # Features
 
 ## Easily download and extract any build:
