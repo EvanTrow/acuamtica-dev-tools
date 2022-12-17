@@ -9,6 +9,10 @@
 <br/>
 <br/>
 
+# Features
+
+## Easily download and extract any build:
+
 ![Build-Download](./.erb/img/acu-dev-tools-build-download.gif 'Build Download')
 
 ## Install
