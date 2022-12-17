@@ -77,9 +77,10 @@ db.exec(fs.readFileSync(getAssetPath('sql/create-settings.sql')).toString());
 db.exec(fs.readFileSync(getAssetPath('sql/create-instances.sql')).toString());
 db.exec(fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString());
 
-const settings = db.prepare('SELECT * FROM settings').get();
+var settings = db.prepare('SELECT * FROM settings').get();
 if (!settings) {
 	db.prepare(`INSERT INTO settings (hostname, extractMsi) VALUES (?, ?);`).run('localhost', 0);
+	settings = db.prepare('SELECT * FROM settings').get();
 }
 
 const createWindow = async () => {
@@ -89,8 +90,8 @@ const createWindow = async () => {
 
 	mainWindow = new BrowserWindow({
 		show: false,
-		width: settings.windowWidth,
-		height: settings.windowheight,
+		width: settings?.windowWidth,
+		height: settings?.windowheight,
 		icon: getAssetPath('icon.png'),
 		// autoHideMenuBar: !isDevelopment,
 		// frame: isDevelopment,

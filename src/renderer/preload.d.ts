@@ -1,4 +1,4 @@
-import { BuildsRow, InstanceRow, SettingsRow } from './types';
+import { BuildRow, InstanceRow, SettingsRow } from './types';
 import { AlertColor } from '@mui/material/Alert';
 
 export interface IElectronAPI {
@@ -16,7 +16,8 @@ export interface IElectronAPI {
 	getInstances: () => Promise<InstanceRow[]>;
 
 	getBuilds: () => Promise<string[]>;
-	getAvailableBuilds: () => Promise<BuildsRow[]>;
+	getAvailableBuilds: () => Promise<BuildRow[]>;
+	downloadBuild: (build: BuildRow, extractMsi: boolean) => void;
 
 	events: {
 		sendMessage(channel: string, args: unknown[]): void;

@@ -5,7 +5,7 @@ const sql = require('mssql');
 const convert = require('xml-js');
 const xmlOptions = { compact: true, spaces: 4 };
 
-const { GetSettings, SendToast } = require('../helpers');
+const { GetSettings, SendToast } = require('./../helpers');
 
 export default async function GetInstances(mainWindow, database) {
 	try {

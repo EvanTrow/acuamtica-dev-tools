@@ -9,6 +9,8 @@
 <br/>
 <br/>
 
+![Build-Download](./.erb/img/acu-dev-tools-build-download.gif 'Build Download')
+
 ## Install
 
 Clone the repo and install dependencies:

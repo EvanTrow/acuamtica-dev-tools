@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { BuildRow } from './actions/downloadBuild';
 
 contextBridge.exposeInMainWorld('electronAPI', {
 	events: {
@@ -33,4 +34,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 	getBuilds: () => ipcRenderer.invoke('getBuilds'),
 	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),
+	downloadBuild: (build: BuildRow, extractMsi: boolean) => ipcRenderer.send('downloadBuild', build, extractMsi),
 });

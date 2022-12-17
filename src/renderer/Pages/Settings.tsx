@@ -20,7 +20,6 @@ export default function Instances() {
 
 	const [buildLocation, setBuildLocation] = React.useState(window.appSettings.buildLocation);
 	const [buildLocationValid, setBuildLocationValid] = React.useState(true);
-	const [extractMsi, setExtractMsi] = React.useState(window.appSettings.extractMsi);
 	const [lessmsiPath, setLessmsiPath] = React.useState(window.appSettings.lessmsiPath);
 	const [lessmsiPathValid, setLessmsiPathValid] = React.useState(true);
 
@@ -48,12 +47,6 @@ export default function Instances() {
 			window.appSettings.buildLocation = buildLocation;
 			window.electronAPI.execSQL(`UPDATE settings SET buildLocation = '${buildLocation}';`);
 		}
-	};
-
-	const updateExtractMsi = async (extractMsi: boolean) => {
-		setExtractMsi(extractMsi);
-		window.appSettings.extractMsi = extractMsi;
-		window.electronAPI.execSQL(`UPDATE settings SET extractMsi = ${extractMsi ? 1 : 0};`);
 	};
 
 	const updateLessmsiPath = async (lessmsiPath: string) => {
@@ -117,24 +110,15 @@ export default function Instances() {
 								onChange={(e) => updateBuildLocation(e.target.value)}
 								error={!buildLocationValid}
 							/>
-							<FormGroup>
-								<FormControlLabel control={<Switch checked={extractMsi} onChange={(e) => updateExtractMsi(e.target.checked)} />} label='Extract MSI' />
-							</FormGroup>
-							<FormHelperText>Extract contents of MSI folder when download completes</FormHelperText>
-							<br />
-							{extractMsi ? (
-								<TextField
-									label='lessmsi Path'
-									fullWidth
-									variant='outlined'
-									helperText={lessmsiPathValid ? 'Path to lessmsi.exe' : 'Invalid Path'}
-									value={lessmsiPath}
-									onChange={(e) => updateLessmsiPath(e.target.value)}
-									error={!lessmsiPathValid}
-								/>
-							) : (
-								''
-							)}
+							<TextField
+								label='lessmsi Path'
+								fullWidth
+								variant='outlined'
+								helperText={lessmsiPathValid ? 'Path to lessmsi.exe' : 'Invalid Path'}
+								value={lessmsiPath}
+								onChange={(e) => updateLessmsiPath(e.target.value)}
+								error={!lessmsiPathValid}
+							/>
 						</CardContent>
 					</Card>
 				</Grid>

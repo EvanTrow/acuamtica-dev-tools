@@ -1,111 +1,95 @@
-const request = require('request');
-const convert = require('xml-js');
-const fs = require('fs-extra');
-const naturalSort = require('javascript-natural-sort');
-const stringSimilarity = require('string-similarity');
-const prompt = require('prompt-sync')({ sigint: true });
-const colors = require('colors');
-const Table = require('cli-table');
-const cliProgress = require('cli-progress');
+import fs from 'fs-extra';
+import request from 'request';
 
-var xmlOptions = { compact: true, spaces: 4 };
+import { app, BrowserWindow, IpcMainEvent } from 'electron';
+import sqlite from 'better-sqlite3';
+import { GetSettings, SendToast } from './../helpers';
+import path from 'path';
 
-async function start(selectedBuild) {
-	console.log(colors.green.bold(`Selected build: `), selectedBuild);
+export type BuildRow = {
+	build: string;
+	version: string;
+	path: string;
+};
 
-	if (config.extractMsi == true) {
-		if (fs.existsSync(`${config.location}/${selectedBuild.build}`)) {
-			const overwriteExisting = prompt(colors.yellow.bold(`Build is already loaded, OVERWRITE existing files in [ ${config.location}\\${selectedBuild.build} ] ?  (y/N) : `));
-			if (overwriteExisting != 'y' && overwriteExisting != 'Y') {
-				console.log('Opening destination folder...'.green);
-				await openExplorer(`${config.location}\\${selectedBuild.build}`);
-				process.exit(0);
-			} else {
-				console.log(`Deleting existing files in ${config.location}\\${selectedBuild.build}...`.yellow);
-				fs.rmSync(`${config.location}/${selectedBuild.build}`, { recursive: true, force: true });
-				console.log('Done.'.green);
-			}
-		}
-	}
-
-	downloadMSI(`http://acumatica-builds.s3.amazonaws.com/${selectedBuild.path}AcumaticaERP/AcumaticaERPInstall.msi`, async (err) => {
-		if (err) throw err;
-
-		console.log('Downloaded!'.green);
-
-		if (config.extractMsi == true) {
-			const progressBar = new cliProgress.SingleBar({
-				format: colors.yellow('Extracting') + '  |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Files',
-				barCompleteChar: '\u2588',
-				barIncompleteChar: '\u2591',
-				hideCursor: true,
-			});
-			var spawn = require('child_process').spawn,
-				child;
-			child = spawn(config.lessmsi, ['x', 'AcumaticaERPInstall.msi', config.location + '\\' + selectedBuild.build]);
-			child.stdout.on('data', function (data) {
-				try {
-					if (progressBar.getProgress() <= 0) {
-						var fileCount = data.toString().split('/')[1].match(/\d+/)[0];
-						progressBar.start(parseInt(fileCount), 1);
-					} else {
-						var activeFile = data.toString().split('/')[0].match(/\d+/)[0];
-						progressBar.update(parseInt(activeFile));
-					}
-				} catch (e) {
-					//console.log(e);
-				}
-			});
-			child.stderr.on('data', function (data) {
-				console.log('Powershell Error: ' + data);
-			});
-			child.on('exit', async () => {
-				progressBar.stop();
-				console.log('Extracted!'.green);
-
-				console.log('Moving Files...'.yellow);
-				if (fs.existsSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`)) {
-					// Do something
-
-					fs.moveSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`, `${config.location}/${selectedBuild.build}`, (err) => {
-						if (err) return console.error(err);
-					});
-				} else {
-					fs.moveSync(`AcumaticaERPInstall/SourceDir`, `${config.location}/${selectedBuild.build}`, (err) => {
-						if (err) return console.error(err);
-					});
-				}
-				console.log('Moved.'.green);
-
-				console.log('Removing temp files...'.yellow);
-				fs.rmSync(`AcumaticaERPInstall`, { recursive: true, force: true });
-				fs.rmSync(`AcumaticaERPInstall.msi`, { recursive: true, force: true });
-				console.log('Done.'.green);
-
-				console.log('COMPLETE!'.green);
-				await openExplorer(`${config.location}\\${selectedBuild.build}`);
-			});
-			child.stdin.end(); //end input
-		} else {
-			fs.renameSync('AcumaticaERPInstall.msi', `AcumaticaERPInstall-${selectedBuild.build}.msi`);
-
-			console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`.green);
-
-			await openExplorer(__dirname);
-		}
-	});
+export default function DownloadBuild(database: sqlite.Database, mainWindow: BrowserWindow, event: IpcMainEvent, selectedBuild: BuildRow, extractMsi: boolean) {
+	start(database, mainWindow, event, selectedBuild, extractMsi);
 }
 
-async function downloadMSI(url, callback) {
-	const progressBar = new cliProgress.SingleBar({
-		format: colors.yellow('Downloading') + ' |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks',
-		barCompleteChar: '\u2588',
-		barIncompleteChar: '\u2591',
-		hideCursor: true,
-	});
+async function start(database: sqlite.Database, mainWindow: BrowserWindow, event: IpcMainEvent, selectedBuild: BuildRow, extractMsi: boolean) {
+	try {
+		console.log(`Downloading build`, selectedBuild);
 
-	const file = fs.createWriteStream('AcumaticaERPInstall.msi');
+		const settings = GetSettings(database, mainWindow);
+		if (!settings) {
+			return;
+		}
+
+		downloadMSI(selectedBuild.path, event, async (err: any) => {
+			if (err) throw err;
+
+			console.log('Downloaded!');
+
+			if (extractMsi == true) {
+				console.log('Extracting...');
+				var spawn = require('child_process').spawn,
+					child;
+				child = spawn(settings.lessmsiPath, ['x', 'AcumaticaERPInstall.msi', settings.buildLocation + '\\' + selectedBuild.build]);
+				child.stdout.on('data', function (data: { toString: () => { (): any; new (): any; split: { (arg0: string): { match: (arg0: RegExp) => any[] }[]; new (): any } } }) {
+					try {
+						var fileCount = data.toString().split('/')[1].match(/\d+/)[0];
+						var activeFile = data.toString().split('/')[0].match(/\d+/)[0];
+
+						event.reply('downloadBuild-extract', [fileCount, activeFile]);
+					} catch (e) {
+						//console.log(e);
+					}
+				});
+				child.stderr.on('data', function (data: string) {
+					console.log('Powershell Error: ' + data);
+					event.reply('downloadBuild-error', ['Powershell Error: ' + data]);
+				});
+				child.on('exit', async () => {
+					console.log('Extracted!');
+
+					event.reply('downloadBuild-status', ['Moving Files...']);
+					console.log('Moving Files...');
+					if (fs.existsSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`)) {
+						// Do something
+
+						fs.moveSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`, `${settings.buildLocation}/${selectedBuild.build}`);
+					} else {
+						fs.moveSync(`AcumaticaERPInstall/SourceDir`, `${settings.buildLocation}/${selectedBuild.build}`);
+					}
+					console.log('Removing temp files...');
+					event.reply('downloadBuild-status', ['Removing temp files...']);
+
+					fs.rmSync(`AcumaticaERPInstall`, { recursive: true, force: true });
+					fs.rmSync(`AcumaticaERPInstall.msi`, { recursive: true, force: true });
+
+					console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
+					event.reply('downloadBuild-complete', [`${settings.buildLocation}/${selectedBuild.build}`]);
+				});
+				child.stdin.end(); //end input
+			} else {
+				fs.moveSync(`AcumaticaERPInstall.msi`, path.join(app.getPath('downloads'), `AcumaticaERPInstall-${selectedBuild.build}.msi`));
+				console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
+				event.reply('downloadBuild-complete', [app.getPath('downloads')]);
+			}
+		});
+	} catch (e) {
+		console.log(e);
+
+		SendToast(mainWindow, 'Error querying Acuamtica instances! > ' + (e as Error).message, 'error');
+	}
+}
+
+async function downloadMSI(url: string, event: IpcMainEvent, callback: any) {
+	var filename = 'AcumaticaERPInstall.msi';
+	const file = fs.createWriteStream(filename);
 	let receivedBytes = 0;
+
+	let totalBytes = 0;
 
 	request
 		.get(url)
@@ -114,46 +98,30 @@ async function downloadMSI(url, callback) {
 				return callback('Response status was ' + response.statusCode);
 			}
 
-			const totalBytes = response.headers['content-length'];
-			progressBar.start(totalBytes, 0);
+			totalBytes = parseInt(String(response.headers['content-length']));
+			// progressBar.start(totalBytes, 0);
+			event.reply('downloadBuild-download', [totalBytes, 0]);
 		})
 		.on('data', (chunk) => {
 			receivedBytes += chunk.length;
-			progressBar.update(receivedBytes);
+
+			event.reply('downloadBuild-download', [totalBytes, receivedBytes]);
 		})
 		.pipe(file)
 		.on('error', (err) => {
 			fs.unlink(filename);
-			progressBar.stop();
+			event.reply('downloadBuild-error', [err.message]);
 			return callback(err.message);
 		});
 
 	file.on('finish', () => {
-		progressBar.stop();
+		// progressBar.stop();
 		file.close(callback);
 	});
 
 	file.on('error', (err) => {
 		fs.unlink(filename);
-		progressBar.stop();
+		// progressBar.stop();
 		return callback(err.message);
 	});
-}
-
-function WebRequest(url) {
-	return new Promise(function (resolve, reject) {
-		request(url, function (error, res, body) {
-			if (!error && res.statusCode === 200) {
-				resolve(body);
-			} else {
-				reject(error);
-			}
-		});
-	});
-}
-
-async function asyncForEach(array, callback) {
-	for (let index = 0; index < array.length; index++) {
-		await callback(array[index], index, array);
-	}
 }

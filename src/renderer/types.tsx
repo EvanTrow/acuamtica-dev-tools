@@ -1,4 +1,5 @@
 export type SettingsRow = {
+	menuOpen: boolean;
 	hostname: string;
 	instanceLocation: string;
 	buildLocation: string;
@@ -17,7 +18,7 @@ export type InstanceRow = {
 	dbTotalSize: number;
 };
 
-export type BuildsRow = {
+export type BuildRow = {
 	build: string;
 	version: string;
 	path: string;

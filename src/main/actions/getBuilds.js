@@ -2,7 +2,7 @@ const request = require('request');
 const convert = require('xml-js');
 const naturalSort = require('javascript-natural-sort');
 
-const { SendToast } = require('../helpers');
+const { SendToast } = require('./../helpers');
 
 var xmlOptions = { compact: true, spaces: 4 };
 

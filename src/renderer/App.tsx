@@ -87,9 +87,10 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function App() {
-	const [open, setOpen] = React.useState(true);
+	const [open, setOpen] = React.useState(window?.appSettings?.menuOpen as boolean);
 	const toggleDrawer = () => {
 		setOpen(!open);
+		window.electronAPI.execSQL(`UPDATE settings SET menuOpen = ${!open ? 1 : 0};`);
 	};
 
 	const location = useLocation();

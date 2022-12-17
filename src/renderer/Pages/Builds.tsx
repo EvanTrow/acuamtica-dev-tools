@@ -39,6 +39,12 @@ export default function Instances() {
 		}
 	}, []);
 
+	React.useEffect(() => {
+		window.electronAPI.getBuilds().then((builds) => {
+			setBuilds(builds.reverse());
+		});
+	}, [dialogOpen]);
+
 	return (
 		<>
 			{BuildsSettingsComplete() ? (

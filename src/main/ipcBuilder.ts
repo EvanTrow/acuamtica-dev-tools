@@ -5,8 +5,9 @@ import child, { ExecFileException } from 'child_process';
 
 import GetInstances from './actions/getInstances';
 
-import { SendToast } from './helpers';
-import { OpenExplorer, WindowsPath } from './actions/helpers';
+import { GetSettings, SendToast } from './helpers';
+import { OpenExplorer, WindowsPath } from './helpers';
+import DownloadBuild, { BuildRow } from './actions/downloadBuild';
 
 export default class IpcBuilder {
 	app: Electron.App;
@@ -87,13 +88,9 @@ export default class IpcBuilder {
 		ipcMain.handle('getSettings', async (event) => {
 			return new Promise((resolve, reject) => {
 				try {
-					const settings = this.db.prepare('SELECT * FROM settings').get();
-					resolve({
-						...settings,
-						extractMsi: settings.extractMsi == 1 ? true : false,
-					});
+					const settings = GetSettings(this.db, this.mainWindow);
+					resolve(settings);
 				} catch (e) {
-					SendToast(this.mainWindow, 'IPC Error! getSettings > ' + (e as Error).message, 'error');
 					reject((e as Error).message.toString());
 				}
 			});
@@ -160,6 +157,14 @@ export default class IpcBuilder {
 					reject((e as Error).message.toString());
 				}
 			});
+		});
+
+		ipcMain.on('downloadBuild', (event, build, extractMsi) => {
+			try {
+				DownloadBuild(this.db, this.mainWindow, event, build as BuildRow, extractMsi);
+			} catch (e) {
+				SendToast(this.mainWindow, 'IPC Error! sql > ' + (e as Error).message, 'error');
+			}
 		});
 	}
 }
