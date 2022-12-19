@@ -138,7 +138,7 @@ const createWindow = async () => {
 	// const menuBuilder = new MenuBuilder(mainWindow);
 	// menuBuilder.buildMenu();
 
-	const ipcBuilder = new IpcBuilder(app, mainWindow, db);
+	const ipcBuilder = new IpcBuilder(app, mainWindow, autoUpdater, db);
 	ipcBuilder.buildIpc();
 
 	// Open urls in the user's browser
@@ -240,20 +240,34 @@ function StartTasks(mainWindow: BrowserWindow) {
 		autoUpdater.checkForUpdates();
 	});
 
-	autoUpdater.on('update-available', () => {
+	autoUpdater.on('update-available', (info) => {
 		SendToast(mainWindow, {
-			text: 'Downloading App Update...',
+			text: `Downloading App Update... ${info.version}`,
 			options: {
 				variant: 'info',
 			},
 		});
 	});
-	autoUpdater.on('update-downloaded', () => {
+	autoUpdater.on('update-downloaded', (info) => {
 		SendToast(mainWindow, {
-			text: 'A new version has been downloaded. Restart the app to apply the update.',
+			text: `A new version has been downloaded. Restart the app to apply the update. `,
 			options: {
 				variant: 'success',
 				autoHideDuration: null,
+			},
+
+			action: {
+				btnText: 'Restart',
+				event: 'restartToUpdate',
+			},
+		});
+	});
+
+	autoUpdater.on('error', (info) => {
+		SendToast(mainWindow, {
+			text: info.message,
+			options: {
+				variant: 'error',
 			},
 		});
 	});

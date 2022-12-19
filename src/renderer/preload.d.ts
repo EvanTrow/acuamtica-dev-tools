@@ -5,6 +5,7 @@ export interface IElectronAPI {
 	windowEvents: (action: string) => void;
 	sendToast: (alert: SnackbarAlert) => void;
 	getAppVersion: () => Promise<string>;
+	checkForAppUpdate: () => void;
 	launchApp: (path: string) => Promise<boolean>;
 	openDirectory: (path: string) => Promise<boolean>;
 
@@ -21,7 +22,7 @@ export interface IElectronAPI {
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => void;
 
 	events: {
-		sendMessage(channel: string, args: unknown[]): void;
+		sendMessage(channel: string | undefined, args: unknown[] | undefined): void;
 		on(channel: string, func: (...args: unknown[]) => void): (() => void) | undefined;
 		once(channel: string, func: (...args: unknown[]) => void): void;
 	};

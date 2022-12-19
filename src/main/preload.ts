@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	windowEvents: (action: string) => ipcRenderer.invoke('windowEvents', action),
 	sendToast: (alert: SnackbarAlert) => ipcRenderer.invoke('sendToast', alert),
 	getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
+	checkForAppUpdate: () => ipcRenderer.invoke('checkForAppUpdate'),
 	launchApp: (path: string) => ipcRenderer.invoke('launchApp', path),
 	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
 

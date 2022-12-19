@@ -8,16 +8,19 @@ import GetInstances from './actions/getInstances';
 import { GetSettings, SendToast } from './helpers';
 import { OpenExplorer, WindowsPath } from './helpers';
 import DownloadBuild, { BuildRow } from './actions/downloadBuild';
+import { AppUpdater } from 'electron-updater';
 
 export default class IpcBuilder {
 	app: Electron.App;
-	db: sqlite.Database;
 	mainWindow: BrowserWindow;
+	autoUpdater: AppUpdater;
+	db: sqlite.Database;
 
-	constructor(app: Electron.App, mainWindow: BrowserWindow, db: sqlite.Database) {
+	constructor(app: Electron.App, mainWindow: BrowserWindow, autoUpdater: AppUpdater, db: sqlite.Database) {
 		this.app = app;
-		this.db = db;
 		this.mainWindow = mainWindow;
+		this.autoUpdater = autoUpdater;
+		this.db = db;
 	}
 
 	buildIpc() {
@@ -45,6 +48,32 @@ export default class IpcBuilder {
 			return new Promise((resolve, reject) => {
 				resolve(this.app.getVersion());
 			});
+		});
+
+		ipcMain.handle('checkForAppUpdate', async (event, args) => {
+			SendToast(this.mainWindow, {
+				text: 'Checking for updates...',
+				options: {
+					variant: 'info',
+				},
+			});
+
+			this.autoUpdater.checkForUpdates().then(() => {
+				this.autoUpdater.on('update-not-available', (info) => {
+					SendToast(this.mainWindow, {
+						text: `You're already running the lastest version: ${info.version}`,
+						options: {
+							variant: 'success',
+						},
+					});
+					this.autoUpdater.off('update-not-available', () => {});
+				});
+			});
+		});
+
+		ipcMain.on('restartToUpdate', async (event, args) => {
+			console.log('restartToUpdate');
+			this.autoUpdater.quitAndInstall(false, true);
 		});
 
 		ipcMain.handle('launchApp', async (event, path) => {

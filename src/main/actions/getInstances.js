@@ -1,3 +1,4 @@
+const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 
@@ -5,7 +6,7 @@ const sql = require('mssql');
 const convert = require('xml-js');
 const xmlOptions = { compact: true, spaces: 4 };
 
-const { GetSettings, SendToast } = require('./../helpers');
+const { SendToast, WindowsPath } = require('./../helpers');
 
 export default async function GetInstances(mainWindow, database) {
 	try {
@@ -25,7 +26,7 @@ export default async function GetInstances(mainWindow, database) {
 			var db = null;
 
 			if (site.virtualDirectory._attributes.physicalPath?.toLocaleLowerCase().startsWith(settings.instanceLocation?.toLocaleLowerCase())) {
-				var acuConfig = await loadXml(`${site.virtualDirectory._attributes.physicalPath}Web.config`);
+				var acuConfig = await loadXml(WindowsPath(path.join(site.virtualDirectory._attributes.physicalPath, 'Web.config')));
 				acumaticaVersion = acuConfig.configuration.appSettings.add.find((a) => a._attributes.key == 'Version')._attributes.value;
 
 				try {
@@ -94,22 +95,4 @@ async function asyncForEach(array, callback) {
 async function loadXml(path) {
 	const data = await fsp.readFile(path, 'utf8');
 	return convert.xml2js(data, xmlOptions);
-}
-async function loadHtml(path) {
-	const data = await fsp.readFile(path, 'utf8');
-	return data;
-}
-function dynamicSort(property) {
-	var sortOrder = 1;
-	if (property[0] === '-') {
-		sortOrder = -1;
-		property = property.substr(1);
-	}
-	return function (a, b) {
-		/* next line works with strings and numbers,
-		 * and you may want to customize it to your needs
-		 */
-		var result = a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0;
-		return result * sortOrder;
-	};
 }

@@ -1,11 +1,13 @@
 import * as React from 'react';
 
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import CardContent from '@mui/material/CardContent';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
-import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import SecurityUpdateIcon from '@mui/icons-material/SecurityUpdate';
 
 export default function Instances() {
 	const [hostname, setHostname] = React.useState(window.appSettings.hostname);
@@ -115,7 +117,18 @@ export default function Instances() {
 							<Typography gutterBottom variant='h5' component='div'>
 								About
 							</Typography>
-							Version: {version}
+							<Typography gutterBottom variant='body1' component='div'>
+								Version: {version}
+							</Typography>
+							<Button
+								variant='contained'
+								endIcon={<SecurityUpdateIcon />}
+								onClick={() => {
+									window.electronAPI.checkForAppUpdate();
+								}}
+							>
+								Check for updates
+							</Button>
 						</CardContent>
 					</Card>
 				</Grid>

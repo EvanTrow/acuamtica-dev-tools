@@ -28,6 +28,7 @@ export function SendToast(mainWindow: BrowserWindow, alert: SnackbarAlert) {
 		options: {
 			...alert.options,
 		},
+		action: alert.action,
 	});
 }
 
