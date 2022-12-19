@@ -19,6 +19,15 @@ export default function DownloadBuild(database: sqlite.Database, mainWindow: Bro
 }
 
 async function start(database: sqlite.Database, mainWindow: BrowserWindow, event: IpcMainEvent, selectedBuild: BuildRow, extractMsi: boolean) {
+	const sendError = (text: string) => {
+		SendToast(mainWindow, {
+			text: text,
+			options: {
+				variant: 'error',
+			},
+		});
+	};
+
 	try {
 		console.log(`Downloading build`, selectedBuild);
 
@@ -56,36 +65,46 @@ async function start(database: sqlite.Database, mainWindow: BrowserWindow, event
 
 					event.reply('downloadBuild-status', ['Moving Files...']);
 					console.log('Moving Files...');
-					if (fs.existsSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`)) {
-						fs.move(`AcumaticaERPInstall/SourceDir/Acumatica ERP`, `${settings.buildLocation}/${selectedBuild.build}`);
-					} else {
-						fs.move(`AcumaticaERPInstall/SourceDir`, `${settings.buildLocation}/${selectedBuild.build}`);
-					}
-					console.log('Removing temp files...');
-					event.reply('downloadBuild-status', ['Removing temp files...']);
 
-					fs.rm(`AcumaticaERPInstall`, { recursive: true, force: true });
-					fs.rm(`AcumaticaERPInstall.msi`, { recursive: true, force: true });
-
-					console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
-					event.reply('downloadBuild-complete', [`${settings.buildLocation}/${selectedBuild.build}`]);
+					const source = fs.existsSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`) ? `AcumaticaERPInstall/SourceDir/Acumatica ERP` : `AcumaticaERPInstall/SourceDir`;
+					fs.move(source, `${settings.buildLocation}/${selectedBuild.build}`, { overwrite: true })
+						.then(() => {
+							console.log('Removing temp files...');
+							event.reply('downloadBuild-status', ['Removing temp files...']);
+							fs.rm(`AcumaticaERPInstall`, { recursive: true, force: true })
+								.then(() => {
+									fs.rm(`AcumaticaERPInstall.msi`, { recursive: true, force: true })
+										.then(() => {
+											console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
+											event.reply('downloadBuild-complete', [`${settings.buildLocation}/${selectedBuild.build}`]);
+										})
+										.catch((e) => {
+											sendError(String(e));
+										});
+								})
+								.catch((e) => {
+									sendError(String(e));
+								});
+						})
+						.catch((e) => {
+							sendError(String(e));
+						});
 				});
 				child.stdin.end(); //end input
 			} else {
-				fs.move(`AcumaticaERPInstall.msi`, path.join(app.getPath('downloads'), `AcumaticaERPInstall-${selectedBuild.build}.msi`));
-				console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
-				event.reply('downloadBuild-complete', [app.getPath('downloads')]);
+				fs.move(`AcumaticaERPInstall.msi`, path.join(app.getPath('downloads'), `AcumaticaERPInstall-${selectedBuild.build}.msi`), { overwrite: true })
+					.then(() => {
+						console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
+						event.reply('downloadBuild-complete', [app.getPath('downloads')]);
+					})
+					.catch((e) => {
+						sendError(String(e));
+					});
 			}
 		});
 	} catch (e) {
 		console.log(e);
-
-		SendToast(mainWindow, {
-			text: 'Error querying Acuamtica instances! > ' + (e as Error).message,
-			options: {
-				variant: 'error',
-			},
-		});
+		sendError('Error querying Acuamtica instances! > ' + (e as Error).message);
 	}
 }
 

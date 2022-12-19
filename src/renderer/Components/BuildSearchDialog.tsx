@@ -46,7 +46,6 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 	const [alertOpen, setAlertOpen] = React.useState(false);
 
 	const [downloadProgressOpen, setDownloadProgressOpen] = React.useState(false);
-	const [statuses, setStatuses] = React.useState<string[]>([]);
 
 	const updateExtractMsi = async (extractMsi: boolean) => {
 		setExtractMsi(extractMsi);
