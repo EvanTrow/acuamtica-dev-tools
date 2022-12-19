@@ -29,6 +29,6 @@ export type SnackbarAlert = {
 	text: string;
 	options: {
 		variant: AlertColor;
-		autoHideDuration?: number;
+		autoHideDuration?: number | null | undefined;
 	};
 };

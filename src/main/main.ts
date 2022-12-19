@@ -253,7 +253,7 @@ function StartTasks(mainWindow: BrowserWindow) {
 			text: 'A new version has been downloaded. Restart the app to apply the update.',
 			options: {
 				variant: 'success',
-				autoHideDuration: 0,
+				autoHideDuration: null,
 			},
 		});
 	});

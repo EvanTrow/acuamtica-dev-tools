@@ -16,7 +16,6 @@ export default function Toasts() {
 
 		enqueueSnackbar(alert.text, {
 			...alert.options,
-
 			preventDuplicate: true,
 			action: (key) => (
 				<>
