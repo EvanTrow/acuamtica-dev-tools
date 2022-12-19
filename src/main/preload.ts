@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { SnackbarAlert } from 'renderer/types';
 import { BuildRow } from './actions/downloadBuild';
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -20,7 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	},
 
 	windowEvents: (action: string) => ipcRenderer.invoke('windowEvents', action),
-	sendToast: (text: string, severity: string) => ipcRenderer.invoke('sendToast', text, severity),
+	sendToast: (alert: SnackbarAlert) => ipcRenderer.invoke('sendToast', alert),
 	getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
 	launchApp: (path: string) => ipcRenderer.invoke('launchApp', path),
 	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
@@ -34,5 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 	getBuilds: () => ipcRenderer.invoke('getBuilds'),
 	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),
+	getAvailableBuild: (build: string) => ipcRenderer.invoke('getAvailableBuild', build),
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => ipcRenderer.send('downloadBuild', build, extractMsi),
 });

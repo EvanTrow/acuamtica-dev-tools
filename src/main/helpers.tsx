@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import sqlite from 'better-sqlite3';
 
-import { AlertColor } from '@mui/material/Alert';
+import { SnackbarAlert } from 'renderer/types';
 
 export function GetSettings(db: sqlite.Database, mainWindow: BrowserWindow) {
 	try {
@@ -11,16 +11,23 @@ export function GetSettings(db: sqlite.Database, mainWindow: BrowserWindow) {
 			extractMsi: settings.extractMsi == 1 ? true : false,
 		};
 	} catch (e) {
-		SendToast(mainWindow, 'Unable to get settings > ' + (e as Error).message, 'error');
+		SendToast(mainWindow, {
+			text: 'Unable to get settings > ' + (e as Error).message,
+			options: {
+				variant: 'error',
+			},
+		});
+
 		return undefined;
 	}
 }
 
-export function SendToast(mainWindow: BrowserWindow, message: string, severity: AlertColor) {
+export function SendToast(mainWindow: BrowserWindow, alert: SnackbarAlert) {
 	mainWindow.webContents.send('alert', {
-		open: true,
-		text: message,
-		severity: severity,
+		text: alert.text,
+		options: {
+			...alert.options,
+		},
 	});
 }
 

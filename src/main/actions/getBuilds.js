@@ -50,7 +50,12 @@ async function start(mainWindow, database) {
 						})
 						.catch((err) => {
 							console.error(err);
-							SendToast(mainWindow, 'Error getting Acumatica Builds > ' + err.message, 'error');
+							SendToast(mainWindow, {
+								text: 'Error getting Acumatica Builds > ' + err.message,
+								options: {
+									variant: 'error',
+								},
+							});
 						});
 
 					verionBuildz = verionBuildz.sort(naturalSort).reverse();
@@ -62,7 +67,12 @@ async function start(mainWindow, database) {
 			})
 			.catch((err) => {
 				console.error(err);
-				SendToast(mainWindow, 'Error getting Acumatica Builds > ' + err.message, 'error');
+				SendToast(mainWindow, {
+					text: 'Error getting Acumatica Builds > ' + err.message,
+					options: {
+						variant: 'error',
+					},
+				});
 			});
 
 		database.prepare('delete from availableBuilds').run();
@@ -76,7 +86,12 @@ async function start(mainWindow, database) {
 		console.log('Complete.', builds.length);
 	} catch (error) {
 		console.log(error);
-		SendToast(mainWindow, 'Error querying Acuamtica instances! > ' + error.message, 'error');
+		SendToast(mainWindow, {
+			text: 'Error querying Acuamtica instances! > ' + error.message,
+			options: {
+				variant: 'error',
+			},
+		});
 	}
 }
 

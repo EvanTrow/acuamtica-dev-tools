@@ -1,10 +1,11 @@
+import { AlertColor } from '@mui/material/Alert';
+
 export type SettingsRow = {
 	menuOpen: boolean;
 	hostname: string;
 	instanceLocation: string;
 	buildLocation: string;
 	extractMsi: boolean;
-	lessmsiPath: string;
 };
 
 export type InstanceRow = {
@@ -22,4 +23,12 @@ export type BuildRow = {
 	build: string;
 	version: string;
 	path: string;
+};
+
+export type SnackbarAlert = {
+	text: string;
+	options: {
+		variant: AlertColor;
+		autoHideDuration?: number;
+	};
 };

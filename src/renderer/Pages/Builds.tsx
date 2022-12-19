@@ -40,9 +40,14 @@ export default function Instances() {
 	}, []);
 
 	React.useEffect(() => {
-		window.electronAPI.getBuilds().then((builds) => {
-			setBuilds(builds.reverse());
-		});
+		window.electronAPI
+			.getBuilds()
+			.then((builds) => {
+				setBuilds(builds.reverse());
+			})
+			.catch((e) => {
+				console.error(e);
+			});
 	}, [dialogOpen]);
 
 	return (

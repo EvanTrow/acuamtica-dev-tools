@@ -14,6 +14,8 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
 import { blue } from '@mui/material/colors';
 
+import BuildDownloadingDialog from './BuildDownloadingDialog';
+
 export type BuildMenuProps = {
 	button: BuildMenuButton;
 	build: string;
@@ -25,6 +27,8 @@ export default function BuildMenu(props: BuildMenuProps) {
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
+
+	const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
 
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -47,6 +51,22 @@ export default function BuildMenu(props: BuildMenuProps) {
 		}
 	}
 
+	async function startDownload(build: string) {
+		console.log(build);
+
+		window.electronAPI
+			.getAvailableBuild(build)
+			.then((selectedBuild) => {
+				if (selectedBuild.build) {
+					setDownloadDialogOpen(true);
+					window.electronAPI.downloadBuild(selectedBuild, true);
+				}
+			})
+			.catch((e) => {
+				console.error(e);
+			});
+	}
+
 	const checkPath = async (path: string): Promise<boolean> => {
 		const result = await window.electronAPI.checkPath(path);
 		return result;
@@ -55,7 +75,7 @@ export default function BuildMenu(props: BuildMenuProps) {
 	return (
 		<div>
 			{props.button == 'icon' ? (
-				<IconButton id='long-button' aria-controls={open ? 'long-menu' : undefined} aria-expanded={open ? 'true' : undefined} aria-haspopup='true' onClick={handleClick}>
+				<IconButton onClick={handleClick}>
 					<MoreVertIcon />
 				</IconButton>
 			) : (
@@ -63,7 +83,7 @@ export default function BuildMenu(props: BuildMenuProps) {
 			)}
 
 			{props.button == 'button' ? (
-				<Button id='long-button' aria-controls={open ? 'long-menu' : undefined} aria-expanded={open ? 'true' : undefined} aria-haspopup='true' onClick={handleClick} color='inherit'>
+				<Button onClick={handleClick} color='inherit'>
 					{props.build}
 				</Button>
 			) : (
@@ -108,14 +128,22 @@ export default function BuildMenu(props: BuildMenuProps) {
 						</MenuItem>
 					</div>
 				) : (
-					<MenuItem>
+					<MenuItem
+						onClick={() => {
+							handleClose();
+
+							startDownload(props.build);
+						}}
+					>
 						<ListItemIcon>
 							<DownloadIcon fontSize='small' sx={{ color: blue[400] }} />
 						</ListItemIcon>
-						<ListItemText>Download Build</ListItemText>
+						<ListItemText>Download & Extract Build</ListItemText>
 					</MenuItem>
 				)}
 			</Menu>
+
+			<BuildDownloadingDialog open={downloadDialogOpen} setOpen={setDownloadDialogOpen} build={props.build} />
 		</div>
 	);
 }

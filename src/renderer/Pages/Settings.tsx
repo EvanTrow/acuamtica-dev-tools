@@ -5,12 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
-import { SettingsRow } from '../types';
 import Grid from '@mui/material/Grid';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import FormHelperText from '@mui/material/FormHelperText';
 
 export default function Instances() {
 	const [hostname, setHostname] = React.useState(window.appSettings.hostname);
@@ -20,8 +15,19 @@ export default function Instances() {
 
 	const [buildLocation, setBuildLocation] = React.useState(window.appSettings.buildLocation);
 	const [buildLocationValid, setBuildLocationValid] = React.useState(true);
-	const [lessmsiPath, setLessmsiPath] = React.useState(window.appSettings.lessmsiPath);
-	const [lessmsiPathValid, setLessmsiPathValid] = React.useState(true);
+
+	const [version, setVersion] = React.useState('');
+
+	React.useEffect(() => {
+		window.electronAPI
+			.getAppVersion()
+			.then((appVersion) => {
+				setVersion(appVersion);
+			})
+			.catch((e) => {
+				console.error(e);
+			});
+	}, []);
 
 	const updateHostname = (hostname: string) => {
 		setHostname(hostname);
@@ -46,16 +52,6 @@ export default function Instances() {
 		if (validPath || buildLocation === '') {
 			window.appSettings.buildLocation = buildLocation;
 			window.electronAPI.execSQL(`UPDATE settings SET buildLocation = '${buildLocation}';`);
-		}
-	};
-
-	const updateLessmsiPath = async (lessmsiPath: string) => {
-		setLessmsiPath(lessmsiPath);
-		var validPath = await checkPath(lessmsiPath);
-		setLessmsiPathValid(validPath && lessmsiPath.endsWith('.exe'));
-		if (validPath && lessmsiPath.endsWith('.exe')) {
-			window.appSettings.lessmsiPath = lessmsiPath;
-			window.electronAPI.execSQL(`UPDATE settings SET lessmsiPath = '${lessmsiPath}';`);
 		}
 	};
 
@@ -110,15 +106,16 @@ export default function Instances() {
 								onChange={(e) => updateBuildLocation(e.target.value)}
 								error={!buildLocationValid}
 							/>
-							<TextField
-								label='lessmsi Path'
-								fullWidth
-								variant='outlined'
-								helperText={lessmsiPathValid ? 'Path to lessmsi.exe' : 'Invalid Path'}
-								value={lessmsiPath}
-								onChange={(e) => updateLessmsiPath(e.target.value)}
-								error={!lessmsiPathValid}
-							/>
+						</CardContent>
+					</Card>
+				</Grid>
+				<Grid item xs={12}>
+					<Card sx={{ minWidth: 275 }}>
+						<CardContent>
+							<Typography gutterBottom variant='h5' component='div'>
+								About
+							</Typography>
+							Version: {version}
 						</CardContent>
 					</Card>
 				</Grid>

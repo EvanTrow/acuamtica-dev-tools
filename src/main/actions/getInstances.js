@@ -58,7 +58,12 @@ export default async function GetInstances(mainWindow, database) {
 			console.log('Updating instance:', site.name);
 
 			if (typeof site.dbName == 'undefined') {
-				SendToast(mainWindow, 'Unable to query database for ' + site.name, 'warning');
+				SendToast(mainWindow, {
+					text: 'Unable to query database for ' + site.name,
+					options: {
+						variant: 'error',
+					},
+				});
 			}
 		});
 
@@ -72,8 +77,12 @@ export default async function GetInstances(mainWindow, database) {
 		console.log('Complete.');
 	} catch (error) {
 		console.log(error);
-
-		SendToast(mainWindow, 'Error querying Acuamtica instances! > ' + error.message, 'error');
+		SendToast(mainWindow, {
+			text: 'Error querying Acuamtica instances! > ' + error.message,
+			options: {
+				variant: 'error',
+			},
+		});
 	}
 }
 

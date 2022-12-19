@@ -2,15 +2,25 @@
 
 ![Screenshot 1](./.erb/img/screenshot01.png 'Screenshot 1')
 
-# Latest Release
+## Latest Release
 
 [![Github Tag][github-tag-image]][github-tag-url]
+<br/><br/>
 
 # Features
 
-## Easily download and extract any build:
+## Download and extract any build:
 
-![Build-Download](./.erb/img/acu-dev-tools-build-download.gif 'Build Download')
+<img src="./.erb/img/download-build.png" alt="Download Build" width="600px"/>
+<br/><br/>
+
+## Easily launch the Acuamtica ERP Configuation Wizard & Report Designer:
+
+<img src="./.erb/img/build-tool-launcher.png" alt="Download Build" width="450px"/>
+
+<br/><br/><br/><br/>
+
+# Development
 
 ## Install
 

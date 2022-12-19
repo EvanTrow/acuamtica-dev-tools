@@ -1,10 +1,12 @@
+import { app, BrowserWindow, IpcMainEvent } from 'electron';
+
 import fs from 'fs-extra';
 import request from 'request';
-
-import { app, BrowserWindow, IpcMainEvent } from 'electron';
-import sqlite from 'better-sqlite3';
-import { GetSettings, SendToast } from './../helpers';
 import path from 'path';
+import sqlite from 'better-sqlite3';
+
+import { GetSettings, SendToast, WindowsPath } from './../helpers';
+import { getAssetPath } from '../main';
 
 export type BuildRow = {
 	build: string;
@@ -34,7 +36,7 @@ async function start(database: sqlite.Database, mainWindow: BrowserWindow, event
 				console.log('Extracting...');
 				var spawn = require('child_process').spawn,
 					child;
-				child = spawn(settings.lessmsiPath, ['x', 'AcumaticaERPInstall.msi', settings.buildLocation + '\\' + selectedBuild.build]);
+				child = spawn(WindowsPath(getAssetPath('lessmsi\\lessmsi.exe')), ['x', 'AcumaticaERPInstall.msi', settings.buildLocation + '\\' + selectedBuild.build]);
 				child.stdout.on('data', function (data: { toString: () => { (): any; new (): any; split: { (arg0: string): { match: (arg0: RegExp) => any[] }[]; new (): any } } }) {
 					try {
 						var fileCount = data.toString().split('/')[1].match(/\d+/)[0];
@@ -55,24 +57,22 @@ async function start(database: sqlite.Database, mainWindow: BrowserWindow, event
 					event.reply('downloadBuild-status', ['Moving Files...']);
 					console.log('Moving Files...');
 					if (fs.existsSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`)) {
-						// Do something
-
-						fs.moveSync(`AcumaticaERPInstall/SourceDir/Acumatica ERP`, `${settings.buildLocation}/${selectedBuild.build}`);
+						fs.move(`AcumaticaERPInstall/SourceDir/Acumatica ERP`, `${settings.buildLocation}/${selectedBuild.build}`);
 					} else {
-						fs.moveSync(`AcumaticaERPInstall/SourceDir`, `${settings.buildLocation}/${selectedBuild.build}`);
+						fs.move(`AcumaticaERPInstall/SourceDir`, `${settings.buildLocation}/${selectedBuild.build}`);
 					}
 					console.log('Removing temp files...');
 					event.reply('downloadBuild-status', ['Removing temp files...']);
 
-					fs.rmSync(`AcumaticaERPInstall`, { recursive: true, force: true });
-					fs.rmSync(`AcumaticaERPInstall.msi`, { recursive: true, force: true });
+					fs.rm(`AcumaticaERPInstall`, { recursive: true, force: true });
+					fs.rm(`AcumaticaERPInstall.msi`, { recursive: true, force: true });
 
 					console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
 					event.reply('downloadBuild-complete', [`${settings.buildLocation}/${selectedBuild.build}`]);
 				});
 				child.stdin.end(); //end input
 			} else {
-				fs.moveSync(`AcumaticaERPInstall.msi`, path.join(app.getPath('downloads'), `AcumaticaERPInstall-${selectedBuild.build}.msi`));
+				fs.move(`AcumaticaERPInstall.msi`, path.join(app.getPath('downloads'), `AcumaticaERPInstall-${selectedBuild.build}.msi`));
 				console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
 				event.reply('downloadBuild-complete', [app.getPath('downloads')]);
 			}
@@ -80,7 +80,12 @@ async function start(database: sqlite.Database, mainWindow: BrowserWindow, event
 	} catch (e) {
 		console.log(e);
 
-		SendToast(mainWindow, 'Error querying Acuamtica instances! > ' + (e as Error).message, 'error');
+		SendToast(mainWindow, {
+			text: 'Error querying Acuamtica instances! > ' + (e as Error).message,
+			options: {
+				variant: 'error',
+			},
+		});
 	}
 }
 

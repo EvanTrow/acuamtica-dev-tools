@@ -19,6 +19,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Grid';
+import BuildDownloadingDialog from './BuildDownloadingDialog';
 
 export type BuildSearchDialogProps = {
 	enabled: boolean;
@@ -45,11 +46,6 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 	const [alertOpen, setAlertOpen] = React.useState(false);
 
 	const [downloadProgressOpen, setDownloadProgressOpen] = React.useState(false);
-	const [downloadProgress, setDownloadProgress] = React.useState(0);
-	const [downloadTotal, setDownloadTotal] = React.useState(0);
-	const [extractProgress, setExtractProgress] = React.useState(0);
-	const [extractTotal, setExtractTotal] = React.useState(0);
-	const [downloadComplete, setDownloadComplete] = React.useState('');
 	const [statuses, setStatuses] = React.useState<string[]>([]);
 
 	const updateExtractMsi = async (extractMsi: boolean) => {
@@ -60,10 +56,15 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 
 	React.useEffect(() => {
 		if (openRef == false && builds.length == 0) {
-			window.electronAPI.getAvailableBuilds().then((builds) => {
-				setBuilds(builds);
-				console.log(builds);
-			});
+			window.electronAPI
+				.getAvailableBuilds()
+				.then((builds) => {
+					setBuilds(builds);
+					console.log(builds);
+				})
+				.catch((e) => {
+					console.error(e);
+				});
 		}
 	}, [props.open]);
 
@@ -87,14 +88,24 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 		setDownloadProgressOpen(true);
 
 		if (typeof build?.path == 'undefined') {
-			window.electronAPI.sendToast(`Downloading Build: ${build.build.build}`, 'info');
+			window.electronAPI.sendToast({
+				text: `Downloading Build: ${build.build.build}`,
+				options: {
+					variant: 'info',
+				},
+			});
+
 			window.electronAPI.downloadBuild(build.build, extractMsi);
 		} else {
-			window.electronAPI.sendToast(`Downloading Build: ${build.build}`, 'info');
+			window.electronAPI.sendToast({
+				text: `Downloading Build: ${build.build}`,
+				options: {
+					variant: 'info',
+				},
+			});
+
 			window.electronAPI.downloadBuild(build, extractMsi);
 		}
-
-		startListeners();
 	};
 
 	const checkPath = async (path: string): Promise<boolean> => {
@@ -102,57 +113,8 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 		return result;
 	};
 
-	const startListeners = () => {
-		window.electronAPI.events.on('downloadBuild-download', (arg) => {
-			let values = arg as number[];
-
-			setDownloadTotal(values[0]);
-			setDownloadProgress(values[1]);
-		});
-		window.electronAPI.events.on('downloadBuild-extract', (arg) => {
-			let values = arg as number[];
-
-			setExtractTotal(values[0]);
-			setExtractProgress(values[1]);
-		});
-
-		window.electronAPI.events.on('downloadBuild-status', (arg) => {
-			console.log('downloadBuild-status', arg);
-			let values = arg as string[];
-
-			var s: string[] = statuses;
-			s.push(String(values[0]));
-
-			setStatuses(s);
-		});
-
-		window.electronAPI.events.on('downloadBuild-error', (arg) => {
-			console.log('downloadBuild-error', arg);
-		});
-
-		window.electronAPI.events.on('downloadBuild-complete', (arg) => {
-			console.log('downloadBuild-complete', arg);
-			let values = arg as string[];
-			setDownloadComplete(values[0]);
-			window.electronAPI.openDirectory(values[0]);
-		});
-	};
-
-	const closeDownloadProgress = () => {
-		setDownloadProgressOpen(false);
-		setDownloadProgress(0);
-		setDownloadTotal(0);
-		setExtractProgress(0);
-		setExtractTotal(0);
-		setDownloadComplete('');
-		setStatuses([]);
-
-		setDownloadProgressOpen(false);
-	};
-
 	return (
 		<div>
-			{props.open.valueOf()}
 			<Dialog
 				maxWidth='sm'
 				fullWidth
@@ -215,53 +177,7 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 				data={{ build: tempBuild }}
 			/>
 
-			<Dialog maxWidth='sm' fullWidth open={downloadProgressOpen} onClose={() => closeDownloadProgress()} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
-				<DialogTitle id='alert-dialog-title'>
-					Downlading{window.appSettings.extractMsi ? ' & Extracting' : ''} Build: {tempBuild?.build}
-				</DialogTitle>
-				<DialogContent>
-					{downloadTotal != 0 ? (
-						<>
-							<Typography variant='subtitle1' component='div' sx={{ flexGrow: 1 }}>
-								Downloading...
-							</Typography>
-							<LinearProgressWithLabel value={(downloadProgress / downloadTotal) * 100} />
-						</>
-					) : (
-						''
-					)}
-					{extractTotal != 0 ? (
-						<>
-							<Typography variant='subtitle1' component='div' sx={{ flexGrow: 1 }}>
-								Extracting...
-							</Typography>
-							<LinearProgressWithLabel value={(extractProgress / extractTotal) * 100} />
-						</>
-					) : (
-						''
-					)}
-
-					{statuses.map((status) => (
-						<Typography variant='subtitle1' component='div' sx={{ flexGrow: 1 }}>
-							{status}
-						</Typography>
-					))}
-
-					{downloadComplete != '' ? (
-						<>
-							<br />
-							<Alert severity='success'>Download{window.appSettings.extractMsi ? ' & Extraction' : ''} Complete!</Alert>
-						</>
-					) : (
-						''
-					)}
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => closeDownloadProgress()} variant={downloadComplete != '' ? 'contained' : 'text'} color={downloadComplete != '' ? 'primary' : 'inherit'}>
-						Close
-					</Button>
-				</DialogActions>
-			</Dialog>
+			<BuildDownloadingDialog open={downloadProgressOpen} setOpen={setDownloadProgressOpen} build={tempBuild?.build} />
 		</div>
 	);
 }

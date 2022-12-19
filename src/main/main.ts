@@ -21,11 +21,14 @@ import { resolveHtmlPath } from './util';
 
 import GetInstances from './actions/getInstances';
 import GetBuilds from './actions/getBuilds';
+import { SendToast } from './helpers';
 
 class AppUpdater {
 	constructor() {
 		log.transports.file.level = 'info';
 		autoUpdater.logger = log;
+		autoUpdater.autoDownload = true;
+		autoUpdater.autoInstallOnAppQuit = true;
 	}
 }
 
@@ -66,7 +69,7 @@ const installExtensions = async () => {
 
 const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(__dirname, '../../assets');
 
-const getAssetPath = (...paths: string[]): string => {
+export const getAssetPath = (...paths: string[]): string => {
 	return path.join(RESOURCES_PATH, ...paths);
 };
 
@@ -176,10 +179,11 @@ app.on('window-all-closed', () => {
 if (!gotTheLock) {
 	app.quit();
 } else {
+	// prevent multiple instances
 	app.on('second-instance', (event, commandLine, workingDirectory) => {
-		// Someone tried to run a second instance, we should focus our window.
 		if (mainWindow) {
 			if (mainWindow.isMinimized()) mainWindow.restore();
+			mainWindow.show();
 			mainWindow.focus();
 		}
 	});
@@ -231,8 +235,26 @@ function StartTasks(mainWindow: BrowserWindow) {
 		GetBuilds(mainWindow, db);
 	});
 
-	autoUpdater.checkForUpdatesAndNotify();
+	autoUpdater.checkForUpdates();
 	cron.schedule('0 */12 * * *', () => {
-		autoUpdater.checkForUpdatesAndNotify();
+		autoUpdater.checkForUpdates();
+	});
+
+	autoUpdater.on('update-available', () => {
+		SendToast(mainWindow, {
+			text: 'Downloading App Update...',
+			options: {
+				variant: 'info',
+			},
+		});
+	});
+	autoUpdater.on('update-downloaded', () => {
+		SendToast(mainWindow, {
+			text: 'A new version has been downloaded. Restart the app to apply the update.',
+			options: {
+				variant: 'success',
+				autoHideDuration: 0,
+			},
+		});
 	});
 }

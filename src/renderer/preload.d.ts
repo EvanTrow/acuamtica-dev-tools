@@ -1,9 +1,9 @@
-import { BuildRow, InstanceRow, SettingsRow } from './types';
+import { BuildRow, InstanceRow, SettingsRow, SnackbarAlert } from './types';
 import { AlertColor } from '@mui/material/Alert';
 
 export interface IElectronAPI {
 	windowEvents: (action: string) => void;
-	sendToast: (text: string, severity: AlertColor) => void;
+	sendToast: (alert: SnackbarAlert) => void;
 	getAppVersion: () => Promise<string>;
 	launchApp: (path: string) => Promise<boolean>;
 	openDirectory: (path: string) => Promise<boolean>;
@@ -17,6 +17,7 @@ export interface IElectronAPI {
 
 	getBuilds: () => Promise<string[]>;
 	getAvailableBuilds: () => Promise<BuildRow[]>;
+	getAvailableBuild: (build: string) => Promise<BuildRow>;
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => void;
 
 	events: {
@@ -25,6 +26,7 @@ export interface IElectronAPI {
 		once(channel: string, func: (...args: unknown[]) => void): void;
 	};
 }
+
 declare global {
 	interface Window {
 		electronAPI: IElectronAPI;

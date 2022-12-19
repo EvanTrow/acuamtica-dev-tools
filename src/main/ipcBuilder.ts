@@ -53,22 +53,34 @@ export default class IpcBuilder {
 				if (fs.existsSync(path)) {
 					child.execFile(path, (err: ExecFileException | null, stdout: string, stderr: string) => {
 						if (err) {
-							SendToast(this.mainWindow, 'IPC Error! launchApp > ' + err.message, 'error');
+							SendToast(this.mainWindow, {
+								text: 'IPC Error! launchApp > ' + err.message,
+								options: {
+									variant: 'error',
+								},
+							});
+
 							resolve(true);
 							return;
 						}
 						resolve(true);
 					});
 				} else {
-					SendToast(this.mainWindow, `IPC Error! launchApp > path (${path}) does not exists.`, 'error');
+					SendToast(this.mainWindow, {
+						text: `IPC Error! launchApp > path (${path}) does not exists.`,
+						options: {
+							variant: 'error',
+						},
+					});
 
 					resolve(true);
 				}
 			});
 		});
 
-		ipcMain.handle('sendToast', async (event, text, severity) => {
-			SendToast(this.mainWindow, text, severity);
+		ipcMain.handle('sendToast', async (event, alert) => {
+			console.log(alert);
+			SendToast(this.mainWindow, alert);
 		});
 
 		ipcMain.handle('openDirectory', async (event, path) => {
@@ -78,7 +90,12 @@ export default class IpcBuilder {
 					await OpenExplorer(path);
 					resolve(true);
 				} else {
-					SendToast(this.mainWindow, `IPC Error! openDirectory > directory (${path}) does not exists.`, 'error');
+					SendToast(this.mainWindow, {
+						text: `IPC Error! openDirectory > directory (${path}) does not exists.`,
+						options: {
+							variant: 'error',
+						},
+					});
 
 					resolve(true);
 				}
@@ -100,7 +117,12 @@ export default class IpcBuilder {
 			try {
 				return fs.existsSync(arg);
 			} catch (e) {
-				SendToast(this.mainWindow, 'IPC Error! checkPath > ' + (e as Error).message, 'error');
+				SendToast(this.mainWindow, {
+					text: 'IPC Error! checkPath > ' + (e as Error).message,
+					options: {
+						variant: 'error',
+					},
+				});
 				return false;
 			}
 		});
@@ -109,7 +131,12 @@ export default class IpcBuilder {
 			try {
 				this.db.prepare(query).run();
 			} catch (e) {
-				SendToast(this.mainWindow, 'IPC Error! sql > ' + (e as Error).message, 'error');
+				SendToast(this.mainWindow, {
+					text: 'IPC Error! sql > ' + (e as Error).message,
+					options: {
+						variant: 'error',
+					},
+				});
 			}
 		});
 
@@ -126,7 +153,12 @@ export default class IpcBuilder {
 					const instances = this.db.prepare('SELECT * FROM instances').all();
 					resolve(instances);
 				} catch (e) {
-					SendToast(this.mainWindow, 'IPC Error! getInstances > ' + (e as Error).message, 'error');
+					SendToast(this.mainWindow, {
+						text: 'IPC Error! getInstances > ' + (e as Error).message,
+						options: {
+							variant: 'error',
+						},
+					});
 					reject((e as Error).message.toString());
 				}
 			});
@@ -142,7 +174,12 @@ export default class IpcBuilder {
 					resolve(folders);
 				} catch (e) {
 					console.log(e);
-					SendToast(this.mainWindow, 'IPC Error! sql > ' + (e as Error).message, 'error');
+					SendToast(this.mainWindow, {
+						text: 'IPC Error! sql > ' + (e as Error).message,
+						options: {
+							variant: 'error',
+						},
+					});
 				}
 			});
 		});
@@ -153,7 +190,44 @@ export default class IpcBuilder {
 					const builds = this.db.prepare('SELECT * FROM availableBuilds').all();
 					resolve(builds);
 				} catch (e) {
-					SendToast(this.mainWindow, 'IPC Error! getAvailableBuilds > ' + (e as Error).message, 'error');
+					SendToast(this.mainWindow, {
+						text: 'IPC Error! getAvailableBuilds > ' + (e as Error).message,
+						options: {
+							variant: 'error',
+						},
+					});
+					reject((e as Error).message.toString());
+				}
+			});
+		});
+
+		ipcMain.handle('getAvailableBuild', async (event, build) => {
+			return new Promise(async (resolve, reject) => {
+				try {
+					const b = this.db.prepare(`SELECT * FROM availableBuilds where build=?`).get(build);
+
+					if (!b) {
+						var msg = `IPC Error! getAvailableBuild > build: ${build} does not exist.`;
+						SendToast(this.mainWindow, {
+							text: msg,
+							options: {
+								variant: 'error',
+							},
+						});
+						reject(msg);
+					} else {
+						resolve(b);
+					}
+
+					//
+				} catch (e) {
+					console.log(e);
+					SendToast(this.mainWindow, {
+						text: 'IPC Error! getBuild > ' + (e as Error).message,
+						options: {
+							variant: 'error',
+						},
+					});
 					reject((e as Error).message.toString());
 				}
 			});
@@ -163,7 +237,12 @@ export default class IpcBuilder {
 			try {
 				DownloadBuild(this.db, this.mainWindow, event, build as BuildRow, extractMsi);
 			} catch (e) {
-				SendToast(this.mainWindow, 'IPC Error! sql > ' + (e as Error).message, 'error');
+				SendToast(this.mainWindow, {
+					text: 'IPC Error! sql > ' + (e as Error).message,
+					options: {
+						variant: 'error',
+					},
+				});
 			}
 		});
 	}
