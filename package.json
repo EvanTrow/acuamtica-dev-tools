@@ -196,7 +196,6 @@
 		],
 		"afterSign": ".erb/scripts/notarize.js",
 		"win": {
-			"publisherName": "EvanTrow",
 			"target": [
 				"nsis"
 			]
