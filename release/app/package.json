@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@types/mssql": "^8.1.1",
 		"better-sqlite3": "^8.0.1",
+		"electron-pdf-window-shy": "^1.0.12",
 		"regedit": "^5.1.1"
 	}
 }

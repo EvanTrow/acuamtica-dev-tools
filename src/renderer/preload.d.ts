@@ -8,6 +8,7 @@ export interface IElectronAPI {
 	checkForAppUpdate: () => void;
 	launchApp: (path: string) => Promise<boolean>;
 	openDirectory: (path: string) => Promise<boolean>;
+	openPDF: (url: string) => void;
 
 	getSettings: () => Promise<SettingsRow>;
 	getAppSettings: () => Promise<Electron.LoginItemSettings>;
@@ -22,7 +23,7 @@ export interface IElectronAPI {
 
 	getBuilds: () => Promise<string[]>;
 	getAvailableBuilds: () => Promise<BuildRow[]>;
-	getAvailableBuild: (build: string) => Promise<BuildRow>;
+	getAvailableBuild: (build: string, showError?: boolean) => Promise<BuildRow>;
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => void;
 
 	events: {

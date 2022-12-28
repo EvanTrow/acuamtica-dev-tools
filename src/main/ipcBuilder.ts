@@ -12,8 +12,10 @@ import { AppUpdater } from 'electron-updater';
 import prepareInstanceForDev from './actions/prepareInstanceForDev';
 import path from 'path';
 import resetUserPassword from './actions/resetUserPassword';
-import { UpdateMainSettings } from './main';
+import { getAssetPath, UpdateMainSettings } from './main';
 import { SettingsRow } from 'renderer/types';
+
+const PDFWindow = require('electron-pdf-window-shy');
 
 export default class IpcBuilder {
 	app: Electron.App;
@@ -140,6 +142,17 @@ export default class IpcBuilder {
 					resolve(true);
 				}
 			});
+		});
+
+		ipcMain.handle('openPDF', async (event, url) => {
+			const win = new PDFWindow({
+				autoHideMenuBar: true,
+				icon: getAssetPath('icon.png'),
+				width: (this.settings?.windowWidth || 1600) - 100,
+				height: (this.settings?.windowheight || 900) - 100,
+			});
+
+			win.loadURL(url);
 		});
 
 		ipcMain.handle('getSettings', async (event) => {
@@ -313,19 +326,22 @@ export default class IpcBuilder {
 			});
 		});
 
-		ipcMain.handle('getAvailableBuild', async (event, build) => {
+		ipcMain.handle('getAvailableBuild', async (event, build, showError) => {
 			return new Promise(async (resolve, reject) => {
 				try {
 					const b = this.db.prepare(`SELECT * FROM availableBuilds where build=?`).get(build);
 
 					if (!b) {
 						var msg = `IPC Error! getAvailableBuild > build: ${build} does not exist.`;
-						SendToast(this.mainWindow, {
-							text: msg,
-							options: {
-								variant: 'error',
-							},
-						});
+
+						if (showError == undefined || showError == true) {
+							SendToast(this.mainWindow, {
+								text: msg,
+								options: {
+									variant: 'error',
+								},
+							});
+						}
 						reject(msg);
 					} else {
 						resolve(b);

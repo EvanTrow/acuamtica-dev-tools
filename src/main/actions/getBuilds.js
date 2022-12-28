@@ -16,7 +16,7 @@ async function start(mainWindow, database) {
 	try {
 		console.log('Getting Acumatica Builds Data');
 
-		await WebRequest(`http://acumatica-builds.s3.amazonaws.com/?delimiter=/&prefix=builds/`)
+		await WebRequest(`https://acumatica-builds.s3.amazonaws.com/?delimiter=/&prefix=builds/`)
 			.then(async (body) => {
 				await asyncForEach(convert.xml2js(body, xmlOptions).ListBucketResult.CommonPrefixes, async (folder, i) => {
 					if (/^(\d*\.)\d.*$/.test(folder.Prefix._text.replace('builds/', '').replace('/', ''))) {
@@ -35,14 +35,14 @@ async function start(mainWindow, database) {
 					var verionBuilds = [];
 					var verionBuildz = [];
 
-					await WebRequest(`http://acumatica-builds.s3.amazonaws.com/?delimiter=/&prefix=builds/${version}/`)
+					await WebRequest(`https://acumatica-builds.s3.amazonaws.com/?delimiter=/&prefix=builds/${version}/`)
 						.then((body) => {
 							convert.xml2js(body, xmlOptions).ListBucketResult.CommonPrefixes.forEach((build) => {
 								if (/^\d{1,}\.\d{1,}\.\d{1,}/.test(build.Prefix._text.replace('builds/', '').replace('/', ''))) {
 									verionBuilds.push({
 										version: version,
 										build: build.Prefix._text.replace(`builds/${version}/`, '').replace('/', ''),
-										path: `http://acumatica-builds.s3.amazonaws.com/${build.Prefix._text}AcumaticaERP/AcumaticaERPInstall.msi`,
+										path: `https://acumatica-builds.s3.amazonaws.com/${build.Prefix._text}AcumaticaERP/AcumaticaERPInstall.msi`,
 									});
 									verionBuildz.push(build.Prefix._text.replace(`builds/${version}/`, '').replace('/', ''));
 								}

@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	checkForAppUpdate: () => ipcRenderer.invoke('checkForAppUpdate'),
 	launchApp: (path: string) => ipcRenderer.invoke('launchApp', path),
 	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
+	openPDF: (url: string) => ipcRenderer.invoke('openPDF', url),
 
 	getSettings: () => ipcRenderer.invoke('getSettings'),
 	getAppSettings: () => ipcRenderer.invoke('getAppSettings'),
@@ -40,6 +41,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 	getBuilds: () => ipcRenderer.invoke('getBuilds'),
 	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),
-	getAvailableBuild: (build: string) => ipcRenderer.invoke('getAvailableBuild', build),
+	getAvailableBuild: (build: string, showError?: boolean) => ipcRenderer.invoke('getAvailableBuild', build, showError),
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => ipcRenderer.send('downloadBuild', build, extractMsi),
 });
