@@ -16,7 +16,7 @@ export function InstanceSettingsAlert() {
 				}
 			>
 				<AlertTitle>Warning</AlertTitle>
-				Please setup instance browsing in settings.
+				Please setup instances in settings.
 			</Alert>
 		</Stack>
 	);

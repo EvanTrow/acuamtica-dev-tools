@@ -40,7 +40,7 @@ export default function Theme() {
 		<Router>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<SnackbarProvider maxSnack={3}>
+				<SnackbarProvider maxSnack={5}>
 					<Toasts />
 				</SnackbarProvider>
 			</ThemeProvider>

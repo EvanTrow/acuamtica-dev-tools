@@ -18,6 +18,8 @@ const root = createRoot(container);
 window.electronAPI
 	.getSettings()
 	.then((settings: SettingsRow) => {
+		// console.log(settings);
+
 		window.appSettings = settings;
 		root.render(<Theme key={0} />);
 	})

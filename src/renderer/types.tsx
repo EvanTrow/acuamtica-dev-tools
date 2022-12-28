@@ -6,17 +6,23 @@ export type SettingsRow = {
 	instanceLocation: string;
 	buildLocation: string;
 	extractMsi: boolean;
+	windowWidth: number;
+	windowheight: number;
+	startMinimized: boolean;
+	minimizeToTray: boolean;
+	resetPassword: string;
+	resetPasswordAll: boolean;
 };
 
 export type InstanceRow = {
 	name: string;
 	path: string;
-	version: string;
 	installPath: string;
-	dbName: string;
-	dbSize: number;
-	dbLogSize: number;
-	dbTotalSize: number;
+	version?: string;
+	dbName?: string;
+	dbSize?: number;
+	dbLogSize?: number;
+	dbTotalSize?: number;
 };
 
 export type BuildRow = {

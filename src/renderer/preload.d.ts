@@ -10,11 +10,15 @@ export interface IElectronAPI {
 	openDirectory: (path: string) => Promise<boolean>;
 
 	getSettings: () => Promise<SettingsRow>;
+	getAppSettings: () => Promise<Electron.LoginItemSettings>;
+	setAppSettings: (openAtLogin: boolean) => Promise<boolean>;
 	checkPath: (filePath: string) => Promise<boolean>;
 	execSQL: (query: string) => void;
 
 	reloadInstances: () => Promise<boolean>;
 	getInstances: () => Promise<InstanceRow[]>;
+	prepareInstanceForDev: (instance: InstanceRow) => Promise<boolean>;
+	resetUserPassword: (instance: InstanceRow) => Promise<boolean>;
 
 	getBuilds: () => Promise<string[]>;
 	getAvailableBuilds: () => Promise<BuildRow[]>;

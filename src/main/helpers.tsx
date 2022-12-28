@@ -1,22 +1,33 @@
 import { BrowserWindow } from 'electron';
 import sqlite from 'better-sqlite3';
 
-import { SnackbarAlert } from 'renderer/types';
+import { SettingsRow, SnackbarAlert } from 'renderer/types';
 
-export function GetSettings(db: sqlite.Database, mainWindow: BrowserWindow) {
+export function GetSettings(db: sqlite.Database, mainWindow?: BrowserWindow) {
 	try {
-		const settings = db.prepare('SELECT * FROM settings').get();
-		return {
-			...settings,
-			extractMsi: settings.extractMsi == 1 ? true : false,
+		let data = db.prepare('SELECT * FROM settings').get();
+
+		let settings: SettingsRow = {
+			...data,
+			menuOpen: data.menuOpen == 1 ? true : false,
+			extractMsi: data.extractMsi == 1 ? true : false,
+			startMinimized: data.startMinimized == 1 ? true : false,
+			minimizeToTray: data.minimizeToTray == 1 ? true : false,
+			resetPasswordAll: data.resetPasswordAll == 1 ? true : false,
 		};
+
+		return settings;
 	} catch (e) {
-		SendToast(mainWindow, {
-			text: 'Unable to get settings > ' + (e as Error).message,
-			options: {
-				variant: 'error',
-			},
-		});
+		if (mainWindow) {
+			SendToast(mainWindow, {
+				text: 'Unable to get settings > ' + (e as Error).message,
+				options: {
+					variant: 'error',
+				},
+			});
+		} else {
+			console.log(e);
+		}
 
 		return undefined;
 	}
@@ -55,4 +66,10 @@ export async function OpenExplorer(path: string) {
 
 export function WindowsPath(path: string): string {
 	return path.replaceAll('/', '\\');
+}
+
+export async function asyncForEach(array: any[], callback: (arg0: any, arg1: number, arg2: any[]) => any) {
+	for (let index = 0; index < array.length; index++) {
+		await callback(array[index], index, array);
+	}
 }

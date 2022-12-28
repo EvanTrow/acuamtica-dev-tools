@@ -21,7 +21,7 @@ import { resolveHtmlPath } from './util';
 
 import GetInstances from './actions/getInstances';
 import GetBuilds from './actions/getBuilds';
-import { SendToast } from './helpers';
+import { GetSettings, SendToast } from './helpers';
 
 class AppUpdater {
 	constructor() {
@@ -50,9 +50,9 @@ if (process.env.NODE_ENV === 'production') {
 
 const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-// if (isDevelopment) {
-require('electron-debug')();
-// }
+if (isDevelopment) {
+	require('electron-debug')();
+}
 
 const installExtensions = async () => {
 	const installer = require('electron-devtools-installer');
@@ -76,15 +76,29 @@ export const getAssetPath = (...paths: string[]): string => {
 let userDataPath = app.getPath('userData');
 const db = new Database(isDevelopment ? './db.sqlite3' : userDataPath + '/db.sqlite3');
 
-db.exec(fs.readFileSync(getAssetPath('sql/create-settings.sql')).toString());
-db.exec(fs.readFileSync(getAssetPath('sql/create-instances.sql')).toString());
-db.exec(fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString());
+let sqlFiles: string[] = fs.readdirSync(getAssetPath('sql'));
+sqlFiles.forEach((sqlFile) => {
+	console.log(`Executing Setup SQL file: ${sqlFile}...`);
 
-var settings = db.prepare('SELECT * FROM settings').get();
+	try {
+		db.exec(fs.readFileSync(getAssetPath(`sql/${sqlFile}`)).toString());
+	} catch (error) {
+		console.log('SQL setup error!', error);
+	}
+});
+
+// db.exec(fs.readFileSync(getAssetPath('sql/create-settings.sql')).toString());
+// db.exec(fs.readFileSync(getAssetPath('sql/create-instances.sql')).toString());
+// db.exec(fs.readFileSync(getAssetPath('sql/create-availableBuilds.sql')).toString());
+
+var settings = GetSettings(db);
 if (!settings) {
 	db.prepare(`INSERT INTO settings (hostname, extractMsi) VALUES (?, ?);`).run('localhost', 0);
-	settings = db.prepare('SELECT * FROM settings').get();
+	settings = GetSettings(db);
 }
+export const UpdateMainSettings = () => {
+	settings = GetSettings(db);
+};
 
 const createWindow = async () => {
 	if (isDevelopment) {
@@ -112,8 +126,9 @@ const createWindow = async () => {
 		if (!mainWindow) {
 			throw new Error('"mainWindow" is not defined');
 		}
-		if (process.env.START_MINIMIZED) {
-			mainWindow.minimize();
+
+		if (settings?.startMinimized && process.argv.includes('--autostart')) {
+			mainWindow.hide();
 		} else {
 			mainWindow.show();
 		}
@@ -128,7 +143,7 @@ const createWindow = async () => {
 	});
 
 	mainWindow.on('close', (event: Event) => {
-		if (!isQuiting) {
+		if (!isQuiting && settings?.minimizeToTray) {
 			event.preventDefault();
 			mainWindow?.hide();
 			event.returnValue = false;
@@ -221,7 +236,7 @@ if (!gotTheLock) {
 		.catch(console.log);
 }
 
-// run tasks every 15 minutes
+// start tasks
 function StartTasks(mainWindow: BrowserWindow) {
 	console.log('Starting tasks');
 

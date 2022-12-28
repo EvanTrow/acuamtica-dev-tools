@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { InstanceRow } from 'renderer/types';
+
 import Link from '@mui/material/Link';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,12 +12,12 @@ import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
-import { InstanceSettingsAlert, InstanceSettingsComplete } from '../Components/Alerts';
-import { InstanceRow } from 'renderer/types';
 import Button from '@mui/material/Button';
 import SyncIcon from '@mui/icons-material/Sync';
-import { DynamicSort } from 'renderer/helpers';
-import BuildMenu from 'renderer/Components/BuildMenu';
+
+import { InstanceSettingsAlert, InstanceSettingsComplete } from '../Components/Alerts';
+import BuildMenu from '../Components/BuildMenu';
+import InstanceMenu from '../Components/InstanceMenu';
 
 export default function Instances() {
 	const [rows, setRows] = React.useState<InstanceRow[]>([]);
@@ -47,6 +49,7 @@ export default function Instances() {
 									<TableCell>Version</TableCell>
 									<TableCell>Install Path</TableCell>
 									<TableCell>Database</TableCell>
+									<TableCell></TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
@@ -59,9 +62,7 @@ export default function Instances() {
 													{row.name}
 												</Link>
 											</TableCell>
-											<TableCell sx={{ paddingTop: 0.5, paddingBottom: 0.5 }}>
-												<BuildMenu build={row.version} button='button' />
-											</TableCell>
+											<TableCell sx={{ paddingTop: 0.5, paddingBottom: 0.5 }}>{row.version && <BuildMenu build={row.version} button='button' />}</TableCell>
 											<TableCell sx={{ paddingTop: 0.5, paddingBottom: 0.5 }}>
 												<Button
 													onClick={() => {
@@ -77,17 +78,20 @@ export default function Instances() {
 												<Tooltip
 													title={
 														<div>
-															DB: {row.dbSize.toFixed(2)} GB
+															DB: {row?.dbSize?.toFixed(2)} GB
 															<br />
-															Log: {row.dbLogSize.toFixed(2)} GB
+															Log: {row?.dbLogSize?.toFixed(2)} GB
 															<br />
-															Total: {row.dbTotalSize.toFixed(2)} GB
+															Total: {row?.dbTotalSize?.toFixed(2)} GB
 														</div>
 													}
 													followCursor
 												>
 													<Box>{row.dbName}</Box>
 												</Tooltip>
+											</TableCell>
+											<TableCell sx={{ paddingTop: 0.5, paddingBottom: 0.5 }}>
+												<InstanceMenu instance={row} />
 											</TableCell>
 										</TableRow>
 									))}

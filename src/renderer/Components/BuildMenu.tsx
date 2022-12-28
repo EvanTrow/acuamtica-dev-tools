@@ -14,7 +14,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
 import { blue } from '@mui/material/colors';
 
-import BuildDownloadingDialog from './BuildDownloadingDialog';
+import BuildDownloadingDialog from './Dialogs/BuildDownloadingDialog';
 
 export type BuildMenuProps = {
 	button: BuildMenuButton;

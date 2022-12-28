@@ -83,7 +83,7 @@ async function start(mainWindow, database) {
 		});
 		insertMany(builds);
 
-		console.log('Complete.', builds.length);
+		console.log(`Found ${builds.length} builds.`);
 	} catch (error) {
 		console.log(error);
 		SendToast(mainWindow, {

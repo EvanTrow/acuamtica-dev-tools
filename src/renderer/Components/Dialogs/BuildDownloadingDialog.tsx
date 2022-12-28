@@ -1,24 +1,14 @@
 import * as React from 'react';
-import { BuildRow } from 'renderer/types';
-import path from 'path-browserify';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
 
-import AlertDialog from './AlertDialog';
-import LinearProgressWithLabel from './LinearProgressWithLabel';
+import LinearProgressWithLabel from '../LinearProgressWithLabel';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import Switch from '@mui/material/Switch';
-import Grid from '@mui/material/Grid';
 
 export type BuildSearchDialogProps = {
 	enabled: boolean;

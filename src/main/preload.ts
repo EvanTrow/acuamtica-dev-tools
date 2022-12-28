@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { SnackbarAlert } from 'renderer/types';
+import { InstanceRow, SnackbarAlert } from 'renderer/types';
 import { BuildRow } from './actions/downloadBuild';
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -28,11 +28,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	openDirectory: (path: string) => ipcRenderer.invoke('openDirectory', path),
 
 	getSettings: () => ipcRenderer.invoke('getSettings'),
+	getAppSettings: () => ipcRenderer.invoke('getAppSettings'),
+	setAppSettings: (openAtLogin: boolean) => ipcRenderer.invoke('setAppSettings', openAtLogin),
 	checkPath: (filePath: string) => ipcRenderer.invoke('checkPath', filePath),
 	execSQL: (query: string) => ipcRenderer.send('execSQL', query),
 
 	reloadInstances: () => ipcRenderer.invoke('reloadInstances'),
 	getInstances: () => ipcRenderer.invoke('getInstances'),
+	prepareInstanceForDev: (instance: InstanceRow) => ipcRenderer.invoke('prepareInstanceForDev', instance),
+	resetUserPassword: (instance: InstanceRow) => ipcRenderer.invoke('resetUserPassword', instance),
 
 	getBuilds: () => ipcRenderer.invoke('getBuilds'),
 	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),

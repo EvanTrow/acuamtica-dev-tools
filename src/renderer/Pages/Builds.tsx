@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 
@@ -17,15 +16,11 @@ import Fab from '@mui/material/Fab';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Divider from '@mui/material/Divider';
-import BuildMenu from 'renderer/Components/BuildMenu';
-import BuildSearchDialog from 'renderer/Components/BuildSearchDialog';
+import BuildMenu from '../Components/BuildMenu';
+import BuildSearchDialog from '../Components/Dialogs/BuildSearchDialog';
 
 export default function Instances() {
 	const [filter, setFilter] = React.useState('');
-
-	const [loadingDirectory, setLoadingDirectory] = React.useState('');
-	const [loadingReport, setLoadingReport] = React.useState('');
-	const [loadingConfig, setLoadingConfig] = React.useState('');
 
 	const [builds, setBuilds] = React.useState<string[]>([]);
 
@@ -33,21 +28,28 @@ export default function Instances() {
 
 	React.useEffect(() => {
 		if (BuildsSettingsComplete()) {
-			window.electronAPI.getBuilds().then((builds) => {
-				setBuilds(builds.reverse());
-			});
+			window.electronAPI
+				.getBuilds()
+				.then((builds) => {
+					setBuilds(builds.reverse());
+				})
+				.catch((e) => {
+					console.error(e);
+				});
 		}
 	}, []);
 
 	React.useEffect(() => {
-		window.electronAPI
-			.getBuilds()
-			.then((builds) => {
-				setBuilds(builds.reverse());
-			})
-			.catch((e) => {
-				console.error(e);
-			});
+		if (BuildsSettingsComplete()) {
+			window.electronAPI
+				.getBuilds()
+				.then((builds) => {
+					setBuilds(builds.reverse());
+				})
+				.catch((e) => {
+					console.error(e);
+				});
+		}
 	}, [dialogOpen]);
 
 	return (
