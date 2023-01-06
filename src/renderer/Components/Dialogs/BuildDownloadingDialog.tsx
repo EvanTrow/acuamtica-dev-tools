@@ -97,9 +97,7 @@ export default function BuildDownloadingDialog(props: BuildDownloadingDialogProp
 	return (
 		<div>
 			<Dialog maxWidth='sm' fullWidth open={props.open} onClose={() => closeDownloadProgress()}>
-				<DialogTitle>
-					Downlading{window.appSettings.extractMsi ? ' & Extracting' : ''} Build: {props.build}
-				</DialogTitle>
+				<DialogTitle>Downlading Build: {props.build}</DialogTitle>
 				<DialogContent>
 					{downloadTotal != 0 ? (
 						<>
@@ -131,7 +129,7 @@ export default function BuildDownloadingDialog(props: BuildDownloadingDialogProp
 					{downloadComplete != '' ? (
 						<>
 							<br />
-							<Alert severity='success'>Download{window.appSettings.extractMsi ? ' & Extraction' : ''} Complete!</Alert>
+							<Alert severity='success'>Download Complete!</Alert>
 						</>
 					) : (
 						''

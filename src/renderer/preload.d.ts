@@ -25,6 +25,7 @@ export interface IElectronAPI {
 	getAvailableBuilds: () => Promise<BuildRow[]>;
 	getAvailableBuild: (build: string, showError?: boolean) => Promise<BuildRow>;
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => void;
+	deleteBuild: (build: string) => void;
 
 	events: {
 		sendMessage(channel: string | undefined, args: unknown[] | undefined): void;

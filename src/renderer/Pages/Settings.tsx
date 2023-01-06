@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { checkPath } from '../utils';
 
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
@@ -101,11 +102,6 @@ export default function Instances() {
 			window.appSettings.buildLocation = buildLocation;
 			window.electronAPI.execSQL(`UPDATE settings SET buildLocation = '${buildLocation}';`);
 		}
-	};
-
-	const checkPath = async (path: string): Promise<boolean> => {
-		const result = await window.electronAPI.checkPath(path);
-		return result;
 	};
 
 	return (

@@ -25,12 +25,10 @@ window.electronAPI
 	})
 	.catch((err) => {
 		root.render(
-			<React.StrictMode>
-				<Snackbar open={true} autoHideDuration={6000}>
-					<Alert severity='error' sx={{ width: '100%' }}>
-						Error getting settings: {String(err)}
-					</Alert>
-				</Snackbar>
-			</React.StrictMode>
+			<Snackbar open={true} autoHideDuration={6000}>
+				<Alert severity='error' sx={{ width: '100%' }}>
+					Error getting settings: {String(err)}
+				</Alert>
+			</Snackbar>
 		);
 	});

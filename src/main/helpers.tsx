@@ -43,6 +43,10 @@ export function SendToast(mainWindow: BrowserWindow, alert: SnackbarAlert) {
 	});
 }
 
+export function ReloadBuilds(mainWindow: BrowserWindow) {
+	mainWindow.webContents.send('reloadBuilds');
+}
+
 export async function OpenExplorer(path: string) {
 	const { spawn } = require('child_process');
 	const child = spawn('explorer', [path]);

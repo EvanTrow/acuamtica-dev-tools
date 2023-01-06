@@ -7,10 +7,11 @@ import Button from '@mui/material/Button';
 
 export type AlertDialogProps = {
 	title: string;
-	detail: any;
+	detail?: any;
 	open: boolean;
 	setOpen(open: boolean): void;
 	confirm(data?: any): void;
+	dismiss?(data?: any): void;
 	dismissBtn?: string;
 	confirmBtn?: string;
 	confirmBtnColor?: buttonColor | 'primary';
@@ -30,17 +31,22 @@ export default function AlertDialog(props: AlertDialogProps) {
 			<Dialog maxWidth='sm' fullWidth open={props.open} onClose={handleClose}>
 				<DialogTitle id='alert-dialog-title'>{props.title}</DialogTitle>
 				<DialogContent>
-					<DialogContentText id='alert-dialog-description'>{props.detail}</DialogContentText>
+					<DialogContentText id='alert-dialog-description'>{props.detail && props.detail}</DialogContentText>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose} color='inherit'>
+					<Button
+						onClick={() => {
+							handleClose();
+							if (props.dismiss) props.dismiss(props.data);
+						}}
+						color='inherit'
+					>
 						{props.dismissBtn || 'Cancel'}
 					</Button>
 					<Button
 						variant='contained'
 						onClick={() => {
 							handleClose();
-							console.log(props);
 							props.confirm(props.data);
 						}}
 						color={props.confirmBtnColor}

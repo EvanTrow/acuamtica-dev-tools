@@ -5,7 +5,7 @@ import request from 'request';
 import path from 'path';
 import sqlite from 'better-sqlite3';
 
-import { GetSettings, SendToast, WindowsPath } from './../helpers';
+import { GetSettings, ReloadBuilds, SendToast, WindowsPath } from './../helpers';
 import { getAssetPath } from '../main';
 
 export type BuildRow = {
@@ -77,6 +77,7 @@ async function start(database: sqlite.Database, mainWindow: BrowserWindow, event
 										.then(() => {
 											console.log(`COMPLETE! - AcumaticaERPInstall-${selectedBuild.build}.msi`);
 											event.reply('downloadBuild-complete', [`${settings.buildLocation}/${selectedBuild.build}`]);
+											ReloadBuilds(mainWindow);
 										})
 										.catch((e) => {
 											sendError(String(e));

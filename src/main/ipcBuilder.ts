@@ -1,11 +1,11 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import fs from 'fs';
+import fs from 'fs-extra';
 import sqlite from 'better-sqlite3';
 import child, { ExecFileException } from 'child_process';
 
 import GetInstances from './actions/getInstances';
 
-import { GetSettings, SendToast, OpenExplorer, WindowsPath, asyncForEach } from './helpers';
+import { GetSettings, SendToast, OpenExplorer, WindowsPath, asyncForEach, ReloadBuilds } from './helpers';
 
 import DownloadBuild, { BuildRow } from './actions/downloadBuild';
 import { AppUpdater } from 'electron-updater';
@@ -366,7 +366,37 @@ export default class IpcBuilder {
 				DownloadBuild(this.db, this.mainWindow, event, build as BuildRow, extractMsi);
 			} catch (e) {
 				SendToast(this.mainWindow, {
-					text: 'IPC Error! sql > ' + (e as Error).message,
+					text: 'IPC Error! downloadBuild > ' + (e as Error).message,
+					options: {
+						variant: 'error',
+					},
+				});
+			}
+		});
+
+		ipcMain.on('deleteBuild', (event, build) => {
+			try {
+				fs.rm(`${this.settings?.buildLocation}/${build}`, { recursive: true, force: true })
+					.then(() => {
+						SendToast(this.mainWindow, {
+							text: `Build ${build} deleted.`,
+							options: {
+								variant: 'success',
+							},
+						});
+						ReloadBuilds(this.mainWindow);
+					})
+					.catch((e) => {
+						SendToast(this.mainWindow, {
+							text: 'IPC Error! deleteBuild > ' + (e as Error).message,
+							options: {
+								variant: 'error',
+							},
+						});
+					});
+			} catch (e) {
+				SendToast(this.mainWindow, {
+					text: 'IPC Error! deleteBuild > ' + (e as Error).message,
 					options: {
 						variant: 'error',
 					},

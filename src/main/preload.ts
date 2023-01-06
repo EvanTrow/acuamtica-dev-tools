@@ -43,4 +43,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	getAvailableBuilds: () => ipcRenderer.invoke('getAvailableBuilds'),
 	getAvailableBuild: (build: string, showError?: boolean) => ipcRenderer.invoke('getAvailableBuild', build, showError),
 	downloadBuild: (build: BuildRow, extractMsi: boolean) => ipcRenderer.send('downloadBuild', build, extractMsi),
+	deleteBuild: (build: string) => ipcRenderer.send('deleteBuild', build),
 });

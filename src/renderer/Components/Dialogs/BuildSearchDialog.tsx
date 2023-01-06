@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { BuildRow } from 'renderer/types';
+import { checkPath } from '../../utils';
 import path from 'path-browserify';
 
 import Dialog from '@mui/material/Dialog';
@@ -102,11 +103,6 @@ export default function BuildSearchDialog(props: BuildSearchDialogProps) {
 
 			window.electronAPI.downloadBuild(build, extractMsi);
 		}
-	};
-
-	const checkPath = async (path: string): Promise<boolean> => {
-		const result = await window.electronAPI.checkPath(path);
-		return result;
 	};
 
 	return (

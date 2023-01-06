@@ -5,9 +5,9 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { SnackbarProvider } from 'notistack';
+
+import '@tremor/react/dist/esm/tremor.css';
 
 import Toasts from './Toasts';
 
